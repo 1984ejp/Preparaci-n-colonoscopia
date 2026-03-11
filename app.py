@@ -47,12 +47,16 @@ st.markdown("""
 background:linear-gradient(180deg,#e9f0f7,#dfe8f3);
 }
 
+/* escritorio */
 html,body,[class*="css"]{
 font-size:22px !important;
 }
 
-h1{font-size:52px !important;}
+h1{
+font-size:52px !important;
+}
 
+/* botones */
 .stButton button{
 font-size:22px !important;
 padding:14px 26px;
@@ -60,8 +64,10 @@ border-radius:14px;
 background:#4da6ff;
 color:white;
 border:none;
+width:100%;
 }
 
+/* tarjeta */
 .card{
 background:white;
 padding:28px;
@@ -69,9 +75,31 @@ border-radius:22px;
 box-shadow:0px 8px 24px rgba(0,0,0,0.08);
 }
 
+/* RESPONSIVE PARA CELULAR */
+
+@media (max-width: 768px){
+
+html,body,[class*="css"]{
+font-size:18px !important;
+}
+
+h1{
+font-size:32px !important;
+}
+
+.card{
+padding:18px;
+}
+
+.stButton button{
+font-size:18px !important;
+padding:12px;
+}
+
+}
+
 </style>
 """,unsafe_allow_html=True)
-
 # --------------------------------------------------
 # DETECTAR ICONOS
 # --------------------------------------------------
@@ -367,14 +395,19 @@ with col1:
 with col2:
 
     if img:
-        st.markdown(f"""
-        <div style="display:flex;justify-content:center;">
-        <img src="data:image/png;base64,{img}" style="width:100%;max-width:850px;border-radius:24px;">
-        </div>
+        st.markdown("""
+        <style>
+        @media (max-width:768px){
+        .hide-mobile{display:none;}
+        }
+        </style>
         """,unsafe_allow_html=True)
 
-st.markdown("---")
-
+        st.markdown(f"""
+        <div class="hide-mobile" style="display:flex;justify-content:center;">
+        <img src="data:image/png;base64,{img}" style="width:100%;max-width:100%;border-radius:24px;">
+        </div>
+        """,unsafe_allow_html=True)
 # --------------------------------------------------
 # ANTES DEL ESTUDIO
 # --------------------------------------------------
