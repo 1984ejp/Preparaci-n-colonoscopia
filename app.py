@@ -90,45 +90,63 @@ def detectar_icono(texto):
         return "⏰","white","#4da6ff"
 
     return "✅","white","#4da6ff"
-
 # --------------------------------------------------
 # MOSTRAR DOCX
 # --------------------------------------------------
 
 def mostrar_docx(ruta):
 
-    if not os.path.exists(ruta):
+    # ruta absoluta para que funcione en Streamlit Cloud
+    base_dir = os.path.dirname(os.path.abspath(__file__))
+    ruta_completa = os.path.join(base_dir, ruta)
+
+    # si el archivo no existe intentar encontrar el de alertas
+    if not os.path.exists(ruta_completa):
+
+        carpeta = os.path.join(base_dir, "textos")
+
+        if os.path.exists(carpeta):
+
+            nombre = os.path.basename(ruta).lower()
+
+            for archivo in os.listdir(carpeta):
+
+                if "alertas" in archivo.lower():
+                    ruta_completa = os.path.join(carpeta, archivo)
+                    break
+
+    # si aún no existe mostrar error
+    if not os.path.exists(ruta_completa):
         st.error(f"No se encontró el archivo: {ruta}")
         return
 
-    doc=Document(ruta)
+    doc = Document(ruta_completa)
 
-    textos=[]
-    buffer=""
+    textos = []
+    buffer = ""
 
     for p in doc.paragraphs:
 
-        texto=p.text.strip()
+        texto = p.text.strip()
 
-        if texto=="":
+        if texto == "":
             continue
 
         if texto.lower().startswith("y/o") or texto.lower().startswith("o "):
-            buffer+=" "+texto
-
+            buffer += " " + texto
         else:
 
-            if buffer!="":
+            if buffer != "":
                 textos.append(buffer)
 
-            buffer=texto
+            buffer = texto
 
-    if buffer!="":
+    if buffer != "":
         textos.append(buffer)
 
     for texto in textos:
 
-        icono,fondo,color=detectar_icono(texto)
+        icono, fondo, color = detectar_icono(texto)
 
         st.markdown(f"""
         <div style="
@@ -142,7 +160,7 @@ def mostrar_docx(ruta):
         border-left:8px solid {color};">
         <b>{icono}</b> {texto}
         </div>
-        """,unsafe_allow_html=True)
+""", unsafe_allow_html=True)
 
 # --------------------------------------------------
 # EXTRAER TEXTO DOCX
