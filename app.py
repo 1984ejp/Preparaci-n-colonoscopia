@@ -91,6 +91,52 @@ def detectar_icono(texto):
 
     return "✅","white","#4da6ff"
 # --------------------------------------------------
+# ALERTAS ANTES DE LA ENDOSCOPIA
+# --------------------------------------------------
+
+def obtener_alertas():
+
+    return [
+
+        ("⚠️","Si toma medicación que altere la coagulación de la sangre debe recordárselo a su médico con anticipación y consultarlo con su médico hematólogo."),
+
+        ("📄","Debe traer la orden del estudio vigente y debidamente autorizada si corresponde."),
+
+        ("👥","Debe concurrir acompañado."),
+
+        ("✅","PODRÁ REALIZAR EL ESTUDIO SI CUMPLE CON LOS 4 ÍTEMS ANTERIORES."),
+
+        ("⏰","8 hs antes del estudio suspende todo alimento sólido y lácteo. Puede continuar con agua y/o Gatorade (sabor manzana o limón) hasta 4 hs antes del procedimiento."),
+
+        ("🚫","NO debe concurrir con las uñas pintadas o esmaltadas."),
+
+        ("🚫","DEBE quitarse los anillos, aros y/o piercings antes del estudio."),
+
+        ("💧","Esta preparación produce una diarrea intensa, por lo que debe realizarla en su domicilio y no en su ámbito laboral."),
+
+        ("⚠️","Es importante que sepa que durante el estudio se pueden extraer pólipos y tomar biopsias. Entre los riesgos potenciales del método está la perforación microscópica o completa del intestino grueso. La incidencia de perforación por colonoscopía es más común después de una terapéutica y oscila entre 0.15% y 2.14% según las series publicadas. Para una colonoscopía diagnóstica la presencia de complicaciones es aproximadamente 1 cada 2000 exploraciones.")
+
+    ]
+def mostrar_alertas():
+
+    alertas = obtener_alertas()
+
+    for icono,texto in alertas:
+
+        st.markdown(f"""
+        <div style="
+        background:white;
+        padding:24px;
+        border-radius:16px;
+        margin-bottom:18px;
+        line-height:1.7;
+        font-size:24px;
+        box-shadow:0px 6px 16px rgba(0,0,0,0.07);
+        border-left:8px solid #4da6ff;">
+        <b>{icono}</b> {texto}
+        </div>
+        """,unsafe_allow_html=True)
+# --------------------------------------------------
 # MOSTRAR DOCX
 # --------------------------------------------------
 
@@ -335,7 +381,7 @@ st.markdown("---")
 
 if opcion=="ANTES DE MI ENDOSCOPIA":
 
-    mostrar_docx(buscar_alertas())
+    mostrar_alertas()
     st.header("Dieta 3 días previos")
 
     mostrar_docx("textos/Dieta comun 3 días PREVIOS AL ESTUDIO.docx")
