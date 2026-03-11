@@ -10,6 +10,25 @@ import tempfile
 st.set_page_config(page_title="Asistente Endoscopía", layout="wide")
 
 # --------------------------------------------------
+# BUSCAR ARCHIVO ROBUSTO
+# --------------------------------------------------
+
+def buscar_alertas():
+
+    carpeta="textos"
+
+    if not os.path.exists(carpeta):
+        return "textos/Alertas Generales a todas las preparaciones.docx"
+
+    for archivo in os.listdir(carpeta):
+
+        if "alertas" in archivo.lower():
+
+            return os.path.join(carpeta,archivo)
+
+    return "textos/Alertas Generales a todas las preparaciones.docx"
+
+# --------------------------------------------------
 # REINICIAR
 # --------------------------------------------------
 
@@ -298,8 +317,7 @@ st.markdown("---")
 
 if opcion=="ANTES DE MI ENDOSCOPIA":
 
-    mostrar_docx("textos/Alertas Generales a todas las preparaciones.docx")
-
+    mostrar_docx(buscar_alertas())
     st.header("Dieta 3 días previos")
 
     mostrar_docx("textos/Dieta comun 3 días PREVIOS AL ESTUDIO.docx")
