@@ -34,7 +34,6 @@ def generar_pdf_clinico(titulo_doc, secciones, alertas):
     styles = getSampleStyleSheet()
     style_alert = ParagraphStyle('Alert', parent=styles['Normal'], color='red', fontSize=12)
     
-    # Título dinámico dentro del PDF
     story = [Paragraph(f"PLAN: {titulo_doc}", styles["Heading1"]), Spacer(1, 12)]
     
     if alertas:
@@ -69,7 +68,6 @@ st.divider()
 # --- LÓGICA DE SECCIONES ---
 
 if opcion == "ANTES DE MI ENDOSCOPIA":
-    # Eliminada la dieta de 3 días previos por pedido del usuario
     ruta_alertas = "Alertas Generales a todas las preparaciones.docx"
     if os.path.exists(obtener_ruta(ruta_alertas)):
         doc = Document(obtener_ruta(ruta_alertas))
@@ -112,21 +110,22 @@ elif opcion == "MI PREPARACIÓN":
                 ruta_p = f"textos/POLIETINELGLICOL 4 litros de {franja}HS.docx"
             
             if os.path.exists(obtener_ruta(ruta_p)):
+                # Mostrar en pantalla
                 doc_p = Document(obtener_ruta(ruta_p))
                 for p in doc_p.paragraphs:
                     if p.text.strip():
                         ico, fnd, clr = detectar_icono_original(p.text)
                         st.markdown(f'<div style="background:{fnd}; padding:15px; border-radius:10px; margin-bottom:10px; border-left:8px solid {clr};">{ico} {p.text}</div>', unsafe_allow_html=True)
                 
-                # Nombre del archivo y título del PDF combinando medicamento y horario
+                # Preparar Secciones para el PDF (Incluyendo "Después de mi endoscopia")
                 identificador = f"{familia}_{franja.replace(' ', '_')}"
-                
-                secciones = [
+                secciones_pdf = [
                     ("INSTRUCCIONES DE PREPARACIÓN", texto_docx(ruta_p)), 
-                    ("ALERTAS GENERALES", texto_docx("Alertas Generales a todas las preparaciones.docx"))
+                    ("ALERTAS GENERALES", texto_docx("Alertas Generales a todas las preparaciones.docx")),
+                    ("CUIDADOS POST-ESTUDIO", texto_docx("despues de mi endoscopia.docx"))
                 ]
                 
-                pdf_path = generar_pdf_clinico(identificador, secciones, alertas_finales)
+                pdf_path = generar_pdf_clinico(identificador, secciones_pdf, alertas_finales)
                 with open(pdf_path, "rb") as f:
                     st.download_button(
                         label=f"📥 DESCARGAR PLAN: {familia} ({franja} HS)", 
