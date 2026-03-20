@@ -49,25 +49,23 @@ def generar_pdf_clinico(titulo_doc, secciones, alertas):
     doc.build(story)
     return tmp.name
 
-# --- INTERFAZ ---
-with st.sidebar:
-    st.header("Opciones")
-    if st.button("🔄 REINICIAR TODO"):
-        st.cache_data.clear()
-        st.rerun()
+# --- CABECERA ---
+col_txt, col_img = st.columns([1.5, 1])
 
-col1, col2 = st.columns([1.5, 1])
-with col1:
-    st.title("Hola, soy Francisco 👋")
-    opcion = st.radio("Menú Principal:", ["Seleccionar...", "ANTES DE MI ENDOSCOPIA", "MI PREPARACIÓN", "DESPUÉS DE MI ENDOSCOPIA"])
-
-with col2:
+with col_img:
     img = obtener_ruta("francisco.png")
     if os.path.exists(img): st.image(img, width=250)
+    if st.button("🔄 REINICIAR FORMULARIO", use_container_width=True):
+        st.rerun()
+
+with col_txt:
+    st.title("Hola, soy Francisco 👋")
+    opcion = st.radio("¿Qué necesitas consultar?", ["Seleccionar...", "ANTES DE MI ENDOSCOPIA", "MI PREPARACIÓN", "DESPUÉS DE MI ENDOSCOPIA"])
 
 st.divider()
 
-# SECCIÓN: ANTES
+# --- LÓGICA DE SECCIONES ---
+
 if opcion == "ANTES DE MI ENDOSCOPIA":
     ruta_alertas = "Alertas Generales a todas las preparaciones.docx"
     if os.path.exists(obtener_ruta(ruta_alertas)):
@@ -86,47 +84,64 @@ if opcion == "ANTES DE MI ENDOSCOPIA":
                 ico, fnd, clr = detectar_icono_original(p.text)
                 st.markdown(f'<div style="background:{fnd}; padding:15px; border-radius:10px; margin-bottom:10px; border-left:8px solid {clr};">{ico} {p.text}</div>', unsafe_allow_html=True)
 
-# SECCIÓN: PREPARACIÓN
 elif opcion == "MI PREPARACIÓN":
     c1, c2 = st.columns(2)
     with c1:
-        familia = st.selectbox("Medicamento:", ["FOSFATOS", "PICOSULFATO", "POLIETINELGLICOL", "BAREX KIT"])
-        franja = st.radio("Horario:", ["7 A 12", "12 A 16", "16 A 19"])
+        familia = st.selectbox("Medicamento indicado:", ["FOSFATOS", "PICOSULFATO", "POLIETINELGLICOL", "BAREX KIT"])
+        franja = st.radio("Horario del estudio:", ["7 A 12", "12 A 16", "16 A 19"])
     with c2:
         ant = st.multiselect("Antecedentes:", ["Sin antecedentes", "Diabetes", "Insuficiencia Renal", "Insuficiencia Cardíaca", "Hipertensión Arterial"])
-        med = st.multiselect("Medicación:", ["Sin medicación", "Aspirina (AAS)", "Clopidogrel / Ticagrelor", "Sintrom / Anticoagulantes", "Insulina", "Metformina"])
+        med = st.multiselect("Medicación habitual:", ["Sin medicación", "Aspirina (AAS)", "Clopidogrel / Ticagrelor", "Sintrom / Anticoagulantes", "Insulina", "Metformina"])
 
+    # Lógica de Contraindicación
+    contraindicado = False
     alertas_finales = []
+
     if familia == "FOSFATOS" and any(x in ant for x in ["Insuficiencia Renal", "Insuficiencia Cardíaca"]):
-        alertas_finales.append("🚨 CONTRAINDICACIÓN: Los FOSFATOS están contraindicados en pacientes con Insuficiencia Renal o Cardíaca. CONSULTE A SU MÉDICO.")
+        contraindicado = True
+        st.error("🚨 CONTRAINDICACIÓN: Los FOSFATOS están contraindicados en pacientes con Insuficiencia Renal o Cardíaca. CONSULTE A SU MÉDICO.")
+    
     if "Sintrom / Anticoagulantes" in med: alertas_finales.append("🩸 ANTICOAGULANTES: Requiere planificación médica previa. Consulte a su médico.")
     if "Insulina" in med: alertas_finales.append("💉 INSULINA: Ajustar dosis por ayuno. Consulte a su médico.")
 
     for a in alertas_finales:
-        st.error(a)
+        st.warning(a)
 
-    if st.button("GENERAR MI PLAN Y PDF", use_container_width=True):
-        if familia == "BAREX KIT":
-            ruta_p = "textos/BAREX KIT DE 7 A 12.docx" if franja == "7 A 12" else "textos/BAREX KIT DE 12 A 19.docx"
-        elif familia == "FOSFATOS":
-            ruta_p = f"textos/FOSFATOS DE {franja}.docx"
-        elif familia == "PICOSULFATO":
-            ruta_p = f"textos/PICOSULFATO DE {franja}.docx"
-        else:
-            ruta_p = f"textos/POLIETINELGLICOL 4 litros de {franja}HS.docx"
-        
-        if os.path.exists(obtener_ruta(ruta_p)):
-            doc_p = Document(obtener_ruta(ruta_p))
-            for p in doc_p.paragraphs:
-                if p.text.strip():
-                    ico, fnd, clr = detectar_icono_original(p.text)
-                    st.markdown(f'<div style="background:{fnd}; padding:15px; border-radius:10px; margin-bottom:10px; border-left:8px solid {clr};">{ico} {p.text}</div>', unsafe_allow_html=True)
+    # Solo mostramos el botón y la preparación si NO hay contraindicación
+    if not contraindicado:
+        if st.button("GENERAR MI PLAN Y PDF", use_container_width=True):
+            if familia == "BAREX KIT":
+                ruta_p = "textos/BAREX KIT DE 7 A 12.docx" if franja == "7 A 12" else "textos/BAREX KIT DE 12 A 19.docx"
+            elif familia == "FOSFATOS":
+                ruta_p = f"textos/FOSFATOS DE {franja}.docx"
+            elif familia == "PICOSULFATO":
+                ruta_p = f"textos/PICOSULFATO DE {franja}.docx"
+            else:
+                ruta_p = f"textos/POLIETINELGLICOL 4 litros de {franja}HS.docx"
             
-            secciones = [("PLAN", texto_docx(ruta_p)), ("ALERTAS", texto_docx("Alertas Generales a todas las preparaciones.docx"))]
-            pdf_path = generar_pdf_clinico(familia, secciones, alertas_finales)
-            with open(pdf_path, "rb") as f:
-                st.download_button("📥 DESCARGAR PDF", f, file_name="Plan_Colonoscopia.pdf", use_container_width=True)
-        else:
-            st.error("Documento de preparación no encontrado en el servidor.")
+            if os.path.exists(obtener_ruta(ruta_p)):
+                doc_p = Document(obtener_ruta(ruta_p))
+                for p in doc_p.paragraphs:
+                    if p.text.strip():
+                        ico, fnd, clr = detectar_icono_original(p.text)
+                        st.markdown(f'<div style="background:{fnd}; padding:15px; border-radius:10px; margin-bottom:10px; border-left:8px solid {clr};">{ico} {p.text}</div>', unsafe_allow_html=True)
+                
+                # PDF
+                secciones = [("PLAN", texto_docx(ruta_p)), ("ALERTAS", texto_docx("Alertas Generales a todas las preparaciones.docx"))]
+                pdf_path = generar_pdf_clinico(familia, secciones, alertas_finales)
+                with open(pdf_path, "rb") as f:
+                    st.download_button("📥 DESCARGAR MI PLAN EN PDF", f, file_name="Plan_Preparacion.pdf", use_container_width=True)
+            else:
+                st.error("Documento de preparación no encontrado.")
+    else:
+        st.info("⚠️ La preparación no se puede mostrar debido a la contraindicación detectada. Por favor, hable con su equipo médico.")
 
-# SECCIÓN: DESPU
+elif opcion == "DESPUÉS DE MI ENDOSCOPIA":
+    st.header("Cuidados Post-Estudio")
+    ruta_post = "despues de mi endoscopia.docx"
+    if os.path.exists(obtener_ruta(ruta_post)):
+        doc_post = Document(obtener_ruta(ruta_post))
+        for p in doc_post.paragraphs:
+            if p.text.strip():
+                ico, fnd, clr = detectar_icono_original(p.text)
+                st.markdown(f'<div style="background:{fnd}; padding:15px; border-radius:10px; margin-bottom:10px; border-left:8px solid {clr};">{ico} {p.text}</div>', unsafe_allow_html=True)
