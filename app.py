@@ -34,7 +34,9 @@ def generar_pdf_clinico(titulo_doc, secciones, alertas):
     styles = getSampleStyleSheet()
     style_alert = ParagraphStyle('Alert', parent=styles['Normal'], color='red', fontSize=12)
     
+    # Título dinámico dentro del PDF
     story = [Paragraph(f"PLAN: {titulo_doc}", styles["Heading1"]), Spacer(1, 12)]
+    
     if alertas:
         story.append(Paragraph("OBSERVACIONES MÉDICAS:", styles["Heading2"]))
         for a in alertas:
@@ -67,19 +69,11 @@ st.divider()
 # --- LÓGICA DE SECCIONES ---
 
 if opcion == "ANTES DE MI ENDOSCOPIA":
+    # Eliminada la dieta de 3 días previos por pedido del usuario
     ruta_alertas = "Alertas Generales a todas las preparaciones.docx"
     if os.path.exists(obtener_ruta(ruta_alertas)):
         doc = Document(obtener_ruta(ruta_alertas))
         for p in doc.paragraphs:
-            if p.text.strip():
-                ico, fnd, clr = detectar_icono_original(p.text)
-                st.markdown(f'<div style="background:{fnd}; padding:15px; border-radius:10px; margin-bottom:10px; border-left:8px solid {clr};">{ico} {p.text}</div>', unsafe_allow_html=True)
-    
-    st.subheader("Dieta de los 3 días previos")
-    ruta_dieta = "textos/Dieta comun 3 días PREVIOS AL ESTUDIO.docx"
-    if os.path.exists(obtener_ruta(ruta_dieta)):
-        doc_d = Document(obtener_ruta(ruta_dieta))
-        for p in doc_d.paragraphs:
             if p.text.strip():
                 ico, fnd, clr = detectar_icono_original(p.text)
                 st.markdown(f'<div style="background:{fnd}; padding:15px; border-radius:10px; margin-bottom:10px; border-left:8px solid {clr};">{ico} {p.text}</div>', unsafe_allow_html=True)
@@ -93,7 +87,6 @@ elif opcion == "MI PREPARACIÓN":
         ant = st.multiselect("Antecedentes:", ["Sin antecedentes", "Diabetes", "Insuficiencia Renal", "Insuficiencia Cardíaca", "Hipertensión Arterial"])
         med = st.multiselect("Medicación habitual:", ["Sin medicación", "Aspirina (AAS)", "Clopidogrel / Ticagrelor", "Sintrom / Anticoagulantes", "Insulina", "Metformina"])
 
-    # Lógica de Contraindicación
     contraindicado = False
     alertas_finales = []
 
@@ -107,7 +100,6 @@ elif opcion == "MI PREPARACIÓN":
     for a in alertas_finales:
         st.warning(a)
 
-    # Solo mostramos el botón y la preparación si NO hay contraindicación
     if not contraindicado:
         if st.button("GENERAR MI PLAN Y PDF", use_container_width=True):
             if familia == "BAREX KIT":
@@ -126,11 +118,22 @@ elif opcion == "MI PREPARACIÓN":
                         ico, fnd, clr = detectar_icono_original(p.text)
                         st.markdown(f'<div style="background:{fnd}; padding:15px; border-radius:10px; margin-bottom:10px; border-left:8px solid {clr};">{ico} {p.text}</div>', unsafe_allow_html=True)
                 
-                # PDF
-                secciones = [("PLAN", texto_docx(ruta_p)), ("ALERTAS", texto_docx("Alertas Generales a todas las preparaciones.docx"))]
-                pdf_path = generar_pdf_clinico(familia, secciones, alertas_finales)
+                # Nombre del archivo y título del PDF combinando medicamento y horario
+                identificador = f"{familia}_{franja.replace(' ', '_')}"
+                
+                secciones = [
+                    ("INSTRUCCIONES DE PREPARACIÓN", texto_docx(ruta_p)), 
+                    ("ALERTAS GENERALES", texto_docx("Alertas Generales a todas las preparaciones.docx"))
+                ]
+                
+                pdf_path = generar_pdf_clinico(identificador, secciones, alertas_finales)
                 with open(pdf_path, "rb") as f:
-                    st.download_button("📥 DESCARGAR MI PLAN EN PDF", f, file_name="Plan_Preparacion.pdf", use_container_width=True)
+                    st.download_button(
+                        label=f"📥 DESCARGAR PLAN: {familia} ({franja} HS)", 
+                        data=f, 
+                        file_name=f"Plan_{identificador}.pdf", 
+                        use_container_width=True
+                    )
             else:
                 st.error("Documento de preparación no encontrado.")
     else:
