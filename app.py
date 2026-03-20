@@ -8,7 +8,7 @@ import tempfile
 
 st.set_page_config(page_title="Asistente Endoscopía", layout="wide")
 
-# --- FUNCIONES ORIGINALES ---
+# --- FUNCIONES DE APOYO (Tu lógica original de rutas) ---
 def obtener_ruta(nombre_archivo):
     ruta_raiz = os.path.join(os.getcwd(), nombre_archivo)
     ruta_textos = os.path.join(os.getcwd(), "textos", nombre_archivo)
@@ -54,49 +54,49 @@ def generar_pdf_clinico(titulo_doc, secciones, alertas):
     doc.build(story)
     return tmp.name
 
-# --- INTERFAZ ---
+# --- INTERFAZ (Layout corregido) ---
 col_txt, col_img = st.columns([1.5, 1])
 
 with col_img:
     img_path = obtener_ruta("francisco.png")
     if os.path.exists(img_path):
         st.image(img_path, width=250)
-    # BOTÓN REINICIAR ENTRE IMAGEN Y OPCIONES
-    if st.button("🔄 REINICIAR TODO", use_container_width=True):
+    # BOTÓN REINICIAR: Entre la imagen y las opciones
+    if st.button("🔄 REINICIAR", use_container_width=True):
         st.rerun()
 
 with col_txt:
     st.title("Hola, soy Francisco 👋")
-    opcion = st.radio("Menú Principal:", ["Seleccionar...", "ANTES DE MI ENDOSCOPIA", "MI PREPARACIÓN", "DESPUÉS DE MI ENDOSCOPIA"])
+    opcion = st.radio("¿Qué necesitas consultar?", ["Seleccionar...", "ANTES DE MI ENDOSCOPIA", "MI PREPARACIÓN", "DESPUÉS DE MI ENDOSCOPIA"])
 
 st.divider()
 
-# --- LÓGICA DE SECCIONES BASADA EN TU PRIMER CÓDIGO ---
+# --- SECCIONES (Lógica idéntica al primer código) ---
 
 if opcion == "ANTES DE MI ENDOSCOPIA":
     archivo_antes = "Alertas Generales a todas las preparaciones.docx"
     ruta = obtener_ruta(archivo_antes)
     if os.path.exists(ruta):
         doc = Document(ruta)
-        for i, p in enumerate(doc.paragraphs):
+        for p in doc.paragraphs:
             if p.text.strip():
                 ico, fnd, clr = detectar_icono_original(p.text)
-                # Mantengo el diagramado original 1, 2, 3...
-                st.markdown(f'<div style="background:{fnd}; padding:15px; border-radius:10px; margin-bottom:10px; border-left:8px solid {clr};">{i+1}. {ico} {p.text}</div>', unsafe_allow_html=True)
+                # Sin numeración forzada, tal cual el primer código
+                st.markdown(f'<div style="background:{fnd}; padding:15px; border-radius:10px; margin-bottom:10px; border-left:8px solid {clr};">{ico} {p.text}</div>', unsafe_allow_html=True)
 
 elif opcion == "MI PREPARACIÓN":
     c1, c2 = st.columns(2)
     with c1:
-        familia = st.selectbox("Medicamento:", ["FOSFATOS", "PICOSULFATO", "POLIETINELGLICOL", "BAREX KIT"])
-        franja = st.radio("Horario:", ["7 A 12", "12 A 16", "16 A 19"])
+        familia = st.selectbox("Medicamento indicado:", ["FOSFATOS", "PICOSULFATO", "POLIETINELGLICOL", "BAREX KIT"])
+        franja = st.radio("Horario del estudio:", ["7 A 12", "12 A 16", "16 A 19"])
     with c2:
-        ant = st.multiselect("Antecedentes:", ["Sin antecedentes", "Diabetes", "Insuficiencia Renal", "Insuficiencia Cardíaca", "Hipertensión Arterial"])
-        med = st.multiselect("Medicación:", ["Sin medicación", "Aspirina (AAS)", "Clopidogrel / Ticagrelor", "Sintrom / Anticoagulantes", "Insulina", "Metformina"])
+        ant = st.multiselect("Sus Antecedentes:", ["Sin antecedentes", "Diabetes", "Insuficiencia Renal", "Insuficiencia Cardíaca", "Hipertensión Arterial"])
+        med = st.multiselect("Su Medicación:", ["Sin medicación", "Aspirina (AAS)", "Clopidogrel / Ticagrelor", "Sintrom / Anticoagulantes", "Insulina", "Metformina"])
 
     alertas_f = []
-    # Validación FOSFATOS
+    # BLOQUEO DE SEGURIDAD FOSFATOS
     if familia == "FOSFATOS" and any(x in ant for x in ["Insuficiencia Renal", "Insuficiencia Cardíaca"]):
-        st.error("🚨 CONTRAINDICACIÓN: Los FOSFATOS están contraindicados para sus antecedentes. CONSULTE A SU MÉDICO.")
+        st.error("🚨 CONTRAINDICACIÓN: Los FOSFATOS están contraindicados para usted. CONSULTE A SU MÉDICO.")
     else:
         if "Sintrom / Anticoagulantes" in med: alertas_f.append("🩸 Anticoagulantes: Requiere planificación previa.")
         if "Insulina" in med: alertas_f.append("💉 Insulina: Ajustar dosis por ayuno.")
@@ -104,35 +104,37 @@ elif opcion == "MI PREPARACIÓN":
 
         if st.button("GENERAR MI PLAN Y PDF", use_container_width=True):
             if familia == "BAREX KIT":
-                nombre_p = "BAREX KIT DE 7 A 12.docx" if franja == "7 A 12" else "BAREX KIT DE 12 A 19.docx"
+                archivo_p = "BAREX KIT DE 7 A 12.docx" if franja == "7 A 12" else "BAREX KIT DE 12 A 19.docx"
             else:
                 mapping = {"FOSFATOS": "FOSFATOS", "PICOSULFATO": "PICOSULFATO", "POLIETINELGLICOL": "POLIETINELGLICOL 4 litros"}
-                nombre_p = f"{mapping[familia]} de {franja if familia != 'POLIETINELGLICOL' else franja + 'HS'}.docx"
+                archivo_p = f"{mapping[familia]} de {franja if familia != 'POLIETINELGLICOL' else franja + 'HS'}.docx"
             
-            prep_txt = texto_docx(nombre_p)
+            prep_txt = texto_docx(archivo_p)
             if prep_txt:
-                doc_p = Document(obtener_ruta(nombre_p))
+                # Mostrar preparación en pantalla
+                doc_p = Document(obtener_ruta(archivo_p))
                 for p in doc_p.paragraphs:
                     if p.text.strip():
                         ico, fnd, clr = detectar_icono_original(p.text)
                         st.markdown(f'<div style="background:{fnd}; padding:15px; border-radius:10px; margin-bottom:10px; border-left:8px solid {clr};">{ico} {p.text}</div>', unsafe_allow_html=True)
                 
-                # PDF COMPLETO (Preparación + Antes + Después)
+                # GENERACIÓN DEL PDF COMPLETO (Secciones unificadas)
                 secciones_pdf = [
-                    ("PREPARACIÓN", prep_txt),
-                    ("ALERTAS GENERALES", texto_docx("Alertas Generales a todas las preparaciones.docx")),
-                    ("DESPUÉS DEL ESTUDIO", texto_docx("despues de mi endoscopia.docx"))
+                    ("INSTRUCCIONES DE PREPARACIÓN", prep_txt),
+                    ("ALERTAS ANTES DEL ESTUDIO", texto_docx("Alertas Generales a todas las preparaciones.docx")),
+                    ("CUIDADOS DESPUÉS DEL ESTUDIO", texto_docx("despues de mi endoscopia.docx"))
                 ]
-                pdf = generar_pdf_clinico(f"{familia} ({franja})", secciones_pdf, alertas_f)
+                pdf = generar_pdf_clinico(f"{familia} - {franja} HS", secciones_pdf, alertas_f)
                 with open(pdf, "rb") as f:
-                    st.download_button("📥 DESCARGAR PDF COMPLETO", f, file_name=f"Plan_{familia}_{franja}.pdf", use_container_width=True)
+                    st.download_button("📥 DESCARGAR GUÍA COMPLETA (PDF)", f, file_name=f"Guia_{familia}.pdf", use_container_width=True)
 
 elif opcion == "DESPUÉS DE MI ENDOSCOPIA":
     archivo_post = "despues de mi endoscopia.docx"
     ruta_p = obtener_ruta(archivo_post)
     if os.path.exists(ruta_p):
         doc = Document(ruta_p)
-        for i, p in enumerate(doc.paragraphs):
+        for p in doc.paragraphs:
             if p.text.strip():
                 ico, fnd, clr = detectar_icono_original(p.text)
-                st.markdown(f'<div style="background:{fnd}; padding:15px; border-radius:10px; margin-bottom:10px; border-left:8px solid {clr};">{i+1}. {ico} {p.text}</div>', unsafe_allow_html=True)
+                # Visualización original sin numeración automática
+                st.markdown(f'<div style="background:{fnd}; padding:15px; border-radius:10px; margin-bottom:10px; border-left:8px solid {clr};">{ico} {p.text}</div>', unsafe_allow_html=True)
