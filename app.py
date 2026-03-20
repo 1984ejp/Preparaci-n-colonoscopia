@@ -8,29 +8,12 @@ import tempfile
 
 st.set_page_config(page_title="Asistente Endoscopía", layout="wide")
 
-# --- TEXTOS INTEGRADOS (Lectura directa desde el código) ---
-TEXTO_ALERTAS_GENERALES = """
-• Realice la dieta indicada de forma estricta para asegurar la limpieza del colon.
-• No debe suspender su medicación habitual para la presión o el corazón.
-• Si toma Aspirina o Anticoagulantes, debe haber consultado previamente con su médico.
-• Es obligatorio concurrir con un acompañante adulto que pueda hacerse responsable de su retiro.
-• No podrá conducir ningún tipo de vehículo durante las 12 horas posteriores al estudio.
-• Traiga todos sus estudios previos relacionados (ecografías, análisis, endoscopías anteriores).
-"""
-
-TEXTO_POST_ENDOSCOPIA = """
-✅ Reposo: Mantenga reposo relativo en su domicilio. No realice actividad física intensa hoy.
-✅ Alimentación: Comience con líquidos claros y luego una dieta blanda (té, galletitas de agua, pollo hervido).
-✅ Sedación: Es normal sentir somnolencia o mareos leves. No tome decisiones importantes hoy.
-⚠️ Alarma: En caso de dolor abdominal fuerte, fiebre o sangrado importante, concurra a la guardia médica.
-✅ Medicación: Puede retomar su medicación habitual salvo que el médico le indique lo contrario.
-"""
-
-# --- FUNCIONES DE APOYO ---
+# --- FUNCIONES ORIGINALES ---
 def obtener_ruta(nombre_archivo):
-    # Busca en la carpeta 'textos' para los instructivos .docx
+    ruta_raiz = os.path.join(os.getcwd(), nombre_archivo)
     ruta_textos = os.path.join(os.getcwd(), "textos", nombre_archivo)
-    return ruta_textos if os.path.exists(ruta_textos) else nombre_archivo
+    if os.path.exists(ruta_raiz): return ruta_raiz
+    return ruta_textos
 
 def texto_docx(nombre_archivo):
     ruta = obtener_ruta(nombre_archivo)
@@ -43,15 +26,9 @@ def texto_docx(nombre_archivo):
 def detectar_icono_original(texto):
     t = texto.lower()
     if any(x in t for x in ["no debe", "quitar", "suspenda", "🚫"]): return "🚫", "#ffeaea", "#ff4d4d"
-    if any(x in t for x in ["riesgo", "perforación", "⚠️", "importante"]): return "⚠️", "#fff7cc", "#f0ad4e"
-    if "hs" in t or "hora" in t: return "⏰", "white", "#4da6ff"
+    if any(x in t for x in ["riesgo", "perforación", "biopsia", "importante", "⚠️"]): return "⚠️", "#fff7cc", "#f0ad4e"
+    if "hs" in t or "⏰" in t: return "⏰", "white", "#4da6ff"
     return "✅", "white", "#4da6ff"
-
-def mostrar_texto_con_iconos(texto):
-    for linea in texto.strip().split('\n'):
-        if linea.strip():
-            ico, fnd, clr = detectar_icono_original(linea)
-            st.markdown(f'<div style="background:{fnd}; padding:15px; border-radius:10px; margin-bottom:10px; border-left:8px solid {clr};">{ico} {linea}</div>', unsafe_allow_html=True)
 
 def generar_pdf_clinico(titulo_doc, secciones, alertas):
     tmp = tempfile.NamedTemporaryFile(delete=False, suffix=".pdf")
@@ -77,67 +54,85 @@ def generar_pdf_clinico(titulo_doc, secciones, alertas):
     doc.build(story)
     return tmp.name
 
-# --- INTERFAZ PRINCIPAL ---
+# --- INTERFAZ ---
 col_txt, col_img = st.columns([1.5, 1])
+
 with col_img:
     img_path = obtener_ruta("francisco.png")
-    if os.path.exists(img_path): st.image(img_path, width=250)
-    if st.button("🔄 REINICIAR FORMULARIO", use_container_width=True): st.rerun()
+    if os.path.exists(img_path):
+        st.image(img_path, width=250)
+    # BOTÓN REINICIAR ENTRE IMAGEN Y OPCIONES
+    if st.button("🔄 REINICIAR TODO", use_container_width=True):
+        st.rerun()
 
 with col_txt:
     st.title("Hola, soy Francisco 👋")
-    opcion = st.radio("¿En qué puedo ayudarte hoy?", ["Seleccionar...", "ANTES DE MI ENDOSCOPIA", "MI PREPARACIÓN", "DESPUÉS DE MI ENDOSCOPIA"])
+    opcion = st.radio("Menú Principal:", ["Seleccionar...", "ANTES DE MI ENDOSCOPIA", "MI PREPARACIÓN", "DESPUÉS DE MI ENDOSCOPIA"])
 
 st.divider()
 
+# --- LÓGICA DE SECCIONES BASADA EN TU PRIMER CÓDIGO ---
+
 if opcion == "ANTES DE MI ENDOSCOPIA":
-    st.subheader("Indicaciones Generales")
-    mostrar_texto_con_iconos(TEXTO_ALERTAS_GENERALES)
+    archivo_antes = "Alertas Generales a todas las preparaciones.docx"
+    ruta = obtener_ruta(archivo_antes)
+    if os.path.exists(ruta):
+        doc = Document(ruta)
+        for i, p in enumerate(doc.paragraphs):
+            if p.text.strip():
+                ico, fnd, clr = detectar_icono_original(p.text)
+                # Mantengo el diagramado original 1, 2, 3...
+                st.markdown(f'<div style="background:{fnd}; padding:15px; border-radius:10px; margin-bottom:10px; border-left:8px solid {clr};">{i+1}. {ico} {p.text}</div>', unsafe_allow_html=True)
 
 elif opcion == "MI PREPARACIÓN":
     c1, c2 = st.columns(2)
     with c1:
-        familia = st.selectbox("Medicamento indicado:", ["FOSFATOS", "PICOSULFATO", "POLIETINELGLICOL", "BAREX KIT"])
-        franja = st.radio("Horario de su turno:", ["7 A 12", "12 A 16", "16 A 19"])
+        familia = st.selectbox("Medicamento:", ["FOSFATOS", "PICOSULFATO", "POLIETINELGLICOL", "BAREX KIT"])
+        franja = st.radio("Horario:", ["7 A 12", "12 A 16", "16 A 19"])
     with c2:
-        ant = st.multiselect("Sus Antecedentes:", ["Sin antecedentes", "Diabetes", "Insuficiencia Renal", "Insuficiencia Cardíaca", "Hipertensión Arterial"])
-        med = st.multiselect("Su Medicación:", ["Sin medicación", "Aspirina (AAS)", "Clopidogrel / Ticagrelor", "Sintrom / Anticoagulantes", "Insulina", "Metformina"])
+        ant = st.multiselect("Antecedentes:", ["Sin antecedentes", "Diabetes", "Insuficiencia Renal", "Insuficiencia Cardíaca", "Hipertensión Arterial"])
+        med = st.multiselect("Medicación:", ["Sin medicación", "Aspirina (AAS)", "Clopidogrel / Ticagrelor", "Sintrom / Anticoagulantes", "Insulina", "Metformina"])
 
-    alertas_finales = []
-    # Validación de Seguridad Crítica
+    alertas_f = []
+    # Validación FOSFATOS
     if familia == "FOSFATOS" and any(x in ant for x in ["Insuficiencia Renal", "Insuficiencia Cardíaca"]):
-        st.error("🚨 CONTRAINDICACIÓN: Los FOSFATOS están contraindicados para usted. Por favor, contacte a su médico para cambiar la preparación.")
+        st.error("🚨 CONTRAINDICACIÓN: Los FOSFATOS están contraindicados para sus antecedentes. CONSULTE A SU MÉDICO.")
     else:
-        if "Sintrom / Anticoagulantes" in med: alertas_finales.append("🩸 ATENCIÓN: Sus anticoagulantes requieren manejo previo.")
-        if "Insulina" in med: alertas_finales.append("💉 ATENCIÓN: Debe ajustar su dosis de Insulina por el ayuno.")
-        for a in alertas_finales: st.warning(a)
+        if "Sintrom / Anticoagulantes" in med: alertas_f.append("🩸 Anticoagulantes: Requiere planificación previa.")
+        if "Insulina" in med: alertas_f.append("💉 Insulina: Ajustar dosis por ayuno.")
+        for a in alertas_f: st.warning(a)
 
-        if st.button("GENERAR MI PLAN Y DESCARGAR PDF", use_container_width=True):
-            # Lógica de nombres de archivo
+        if st.button("GENERAR MI PLAN Y PDF", use_container_width=True):
             if familia == "BAREX KIT":
-                archivo = "BAREX KIT DE 7 A 12.docx" if franja == "7 A 12" else "BAREX KIT DE 12 A 19.docx"
+                nombre_p = "BAREX KIT DE 7 A 12.docx" if franja == "7 A 12" else "BAREX KIT DE 12 A 19.docx"
             else:
                 mapping = {"FOSFATOS": "FOSFATOS", "PICOSULFATO": "PICOSULFATO", "POLIETINELGLICOL": "POLIETINELGLICOL 4 litros"}
-                archivo = f"{mapping[familia]} de {franja if familia != 'POLIETINELGLICOL' else franja + 'HS'}.docx"
+                nombre_p = f"{mapping[familia]} de {franja if familia != 'POLIETINELGLICOL' else franja + 'HS'}.docx"
             
-            prep_txt = texto_docx(archivo)
+            prep_txt = texto_docx(nombre_p)
             if prep_txt:
-                st.subheader("Su Instructivo Personalizado:")
-                mostrar_texto_con_iconos(prep_txt)
+                doc_p = Document(obtener_ruta(nombre_p))
+                for p in doc_p.paragraphs:
+                    if p.text.strip():
+                        ico, fnd, clr = detectar_icono_original(p.text)
+                        st.markdown(f'<div style="background:{fnd}; padding:15px; border-radius:10px; margin-bottom:10px; border-left:8px solid {clr};">{ico} {p.text}</div>', unsafe_allow_html=True)
                 
-                # Secciones completas para el PDF
+                # PDF COMPLETO (Preparación + Antes + Después)
                 secciones_pdf = [
-                    ("1. INSTRUCCIONES DE PREPARACIÓN", prep_txt),
-                    ("2. ALERTAS Y RECOMENDACIONES", TEXTO_ALERTAS_GENERALES),
-                    ("3. CUIDADOS POST-ESTUDIO", TEXTO_POST_ENDOSCOPIA)
+                    ("PREPARACIÓN", prep_txt),
+                    ("ALERTAS GENERALES", texto_docx("Alertas Generales a todas las preparaciones.docx")),
+                    ("DESPUÉS DEL ESTUDIO", texto_docx("despues de mi endoscopia.docx"))
                 ]
-                
-                pdf = generar_pdf_clinico(f"{familia} - {franja} HS", secciones_pdf, alertas_finales)
+                pdf = generar_pdf_clinico(f"{familia} ({franja})", secciones_pdf, alertas_f)
                 with open(pdf, "rb") as f:
-                    st.download_button("📥 DESCARGAR GUÍA COMPLETA (PDF)", f, file_name=f"Guia_Endoscopia_{familia}.pdf", use_container_width=True)
-            else:
-                st.error(f"No se encontró el archivo '{archivo}' en la carpeta 'textos'.")
+                    st.download_button("📥 DESCARGAR PDF COMPLETO", f, file_name=f"Plan_{familia}_{franja}.pdf", use_container_width=True)
 
 elif opcion == "DESPUÉS DE MI ENDOSCOPIA":
-    st.header("Cuidados Posteriores")
-    mostrar_texto_con_iconos(TEXTO_POST_ENDOSCOPIA)
+    archivo_post = "despues de mi endoscopia.docx"
+    ruta_p = obtener_ruta(archivo_post)
+    if os.path.exists(ruta_p):
+        doc = Document(ruta_p)
+        for i, p in enumerate(doc.paragraphs):
+            if p.text.strip():
+                ico, fnd, clr = detectar_icono_original(p.text)
+                st.markdown(f'<div style="background:{fnd}; padding:15px; border-radius:10px; margin-bottom:10px; border-left:8px solid {clr};">{i+1}. {ico} {p.text}</div>', unsafe_allow_html=True)
