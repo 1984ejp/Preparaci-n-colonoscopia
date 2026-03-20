@@ -15,11 +15,13 @@ def obtener_ruta(nombre_archivo):
 
 def texto_docx(ruta_relativa):
     ruta_c = obtener_ruta(ruta_relativa)
-    if not os.path.exists(ruta_c): return ""
+    if not os.path.exists(ruta_c): 
+        return ""
     try:
         doc = Document(ruta_c)
         return "\n".join([p.text.strip() for p in doc.paragraphs if p.text.strip() != ""])
-    except: return ""
+    except: 
+        return ""
 
 def detectar_icono_original(texto):
     t = texto.lower()
@@ -65,8 +67,7 @@ with col_txt:
 
 st.divider()
 
-# --- LÓGICA DE SECCIONES ---
-
+# --- SECCIÓN: ANTES DE MI ENDOSCOPIA ---
 if opcion == "ANTES DE MI ENDOSCOPIA":
     ruta_alertas = "Alertas Generales a todas las preparaciones.docx"
     if os.path.exists(obtener_ruta(ruta_alertas)):
@@ -76,6 +77,7 @@ if opcion == "ANTES DE MI ENDOSCOPIA":
                 ico, fnd, clr = detectar_icono_original(p.text)
                 st.markdown(f'<div style="background:{fnd}; padding:15px; border-radius:10px; margin-bottom:10px; border-left:8px solid {clr};">{ico} {p.text}</div>', unsafe_allow_html=True)
 
+# --- SECCIÓN: MI PREPARACIÓN ---
 elif opcion == "MI PREPARACIÓN":
     c1, c2 = st.columns(2)
     with c1:
@@ -110,19 +112,25 @@ elif opcion == "MI PREPARACIÓN":
                 ruta_p = f"textos/POLIETINELGLICOL 4 litros de {franja}HS.docx"
             
             if os.path.exists(obtener_ruta(ruta_p)):
-                # Mostrar en pantalla
+                # Mostrar preparación en pantalla
                 doc_p = Document(obtener_ruta(ruta_p))
                 for p in doc_p.paragraphs:
                     if p.text.strip():
                         ico, fnd, clr = detectar_icono_original(p.text)
                         st.markdown(f'<div style="background:{fnd}; padding:15px; border-radius:10px; margin-bottom:10px; border-left:8px solid {clr};">{ico} {p.text}</div>', unsafe_allow_html=True)
                 
-                # Preparar Secciones para el PDF (Incluyendo "Después de mi endoscopia")
+                # RECOLECCIÓN DE TEXTOS PARA EL PDF
                 identificador = f"{familia}_{franja.replace(' ', '_')}"
+                
+                # Forzamos la carga de los tres archivos necesarios para el PDF completo
+                texto_preparacion = texto_docx(ruta_p)
+                texto_alertas = texto_docx("Alertas Generales a todas las preparaciones.docx")
+                texto_post = texto_docx("despues de mi endoscopia.docx")
+                
                 secciones_pdf = [
-                    ("INSTRUCCIONES DE PREPARACIÓN", texto_docx(ruta_p)), 
-                    ("ALERTAS GENERALES", texto_docx("Alertas Generales a todas las preparaciones.docx")),
-                    ("CUIDADOS POST-ESTUDIO", texto_docx("despues de mi endoscopia.docx"))
+                    ("INSTRUCCIONES DE PREPARACIÓN", texto_preparacion), 
+                    ("ALERTAS GENERALES", texto_alertas),
+                    ("CUIDADOS POST-ESTUDIO", texto_post)
                 ]
                 
                 pdf_path = generar_pdf_clinico(identificador, secciones_pdf, alertas_finales)
@@ -134,16 +142,19 @@ elif opcion == "MI PREPARACIÓN":
                         use_container_width=True
                     )
             else:
-                st.error("Documento de preparación no encontrado.")
+                st.error("Archivo de preparación no encontrado en la carpeta 'textos'.")
     else:
         st.info("⚠️ La preparación no se puede mostrar debido a la contraindicación detectada. Por favor, hable con su equipo médico.")
 
+# --- SECCIÓN: DESPUÉS DE MI ENDOSCOPIA (VISUALIZACIÓN WEB) ---
 elif opcion == "DESPUÉS DE MI ENDOSCOPIA":
     st.header("Cuidados Post-Estudio")
-    ruta_post = "despues de mi endoscopia.docx"
-    if os.path.exists(obtener_ruta(ruta_post)):
-        doc_post = Document(obtener_ruta(ruta_post))
+    ruta_post_web = "despues de mi endoscopia.docx"
+    if os.path.exists(obtener_ruta(ruta_post_web)):
+        doc_post = Document(obtener_ruta(ruta_post_web))
         for p in doc_post.paragraphs:
             if p.text.strip():
                 ico, fnd, clr = detectar_icono_original(p.text)
                 st.markdown(f'<div style="background:{fnd}; padding:15px; border-radius:10px; margin-bottom:10px; border-left:8px solid {clr};">{ico} {p.text}</div>', unsafe_allow_html=True)
+    else:
+        st.warning("El archivo 'despues de mi endoscopia.docx' no se encuentra en el servidor.")
