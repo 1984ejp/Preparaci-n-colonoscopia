@@ -369,54 +369,136 @@ def get_img64(path):
 img=get_img64("francisco.png")
 
 # --------------------------------------------------
-# LAYOUT
+# LAYOUT PRINCIPAL
 # --------------------------------------------------
 
-col1,col2=st.columns([1.1,1])
+col1, col2 = st.columns([1.1, 1])
 
 with col1:
-
-    st.markdown('<div class="card">',unsafe_allow_html=True)
-
+    st.markdown('<div class="card">', unsafe_allow_html=True)
     st.markdown("# Hola, soy Francisco 👋")
-    st.write("Voy a ayudarte paso a paso con tu estudio.")
+    st.markdown("### Voy a ayudarte paso a paso con tu estudio.")
+    
+    # Bloque Institucional
+    st.markdown("""
+    <div style="background:#f0f7ff; padding:20px; border-radius:15px; border-left:5px solid #4da6ff; margin: 20px 0; font-size:18px; color:#1a5c96; line-height:1.6;">
+    <i>"La Endoscopía representa hoy, la mejor técnica que dispone el médico para el diagnóstico 
+    y seguimiento de las enfermedades del Intestino Grueso, para la prevención del Cáncer de Colon 
+    y para el tratamiento de un variado número de lesiones."</i>
+    </div>
+    """, unsafe_allow_html=True)
 
-    opcion=st.radio(
-        "Elegí una opción:",
+    st.write("---") 
+
+    opcion = st.radio(
+        "¿En qué etapa te encuentras?",
         [
-        "Seleccionar...",
-        "ANTES DE MI ENDOSCOPIA",
-        "MI PREPARACIÓN",
-        "DESPUÉS DE MI ENDOSCOPIA"
+            "Seleccionar...",
+            "ANTES DE MI ENDOSCOPIA",
+            "MI PREPARACIÓN",
+            "DESPUÉS DE MI ENDOSCOPIA"
         ]
     )
 
-    st.markdown("<br>",unsafe_allow_html=True)
+    if opcion == "Seleccionar...":
+        st.info("💡 Por favor, selecciona una opción para comenzar con las instrucciones.")
 
-    c1,c2,c3=st.columns([1,1,1])
+    st.markdown("<br>", unsafe_allow_html=True)
 
+    c1, c2, c3 = st.columns([1, 1, 1])
     with c2:
         if st.button("🔄 REINICIAR"):
             reiniciar()
 
-    st.markdown('</div>',unsafe_allow_html=True)
+    st.markdown('</div>', unsafe_allow_html=True)
 
 with col2:
-
     if img:
         st.markdown("""
         <style>
-        @media (max-width:768px){
-        .hide-mobile{display:none;}
-        }
+        @media (max-width:768px){ .hide-mobile{display:none;} }
         </style>
-        """,unsafe_allow_html=True)
+        """, unsafe_allow_html=True)
 
         st.markdown(f"""
         <div class="hide-mobile" style="display:flex;justify-content:center;">
         <img src="data:image/png;base64,{img}" style="width:100%;max-width:100%;border-radius:24px;">
         </div>
-        """,unsafe_allow_html=True)
+        """, unsafe_allow_html=True)
+
+# --------------------------------------------------
+# LÓGICA DE CONTENIDO SEGÚN LA OPCIÓN
+# --------------------------------------------------
+
+if opcion == "ANTES DE MI ENDOSCOPIA":
+    st.markdown("## 📋 Instrucciones Previas")
+    st.markdown(f"""
+    <div style="background:white; padding:30px; border-radius:20px; line-height:1.8; font-size:22px; border-left:10px solid #4da6ff; box-shadow:0px 10px 20px rgba(0,0,0,0.05);">
+        {TEXTO_ANTES.replace(chr(10), '<br>')}
+    </div>
+    """, unsafe_allow_html=True)
+    
+    st.markdown("---")
+    st.header("🍎 Dieta 3 días previos")
+    mostrar_docx("textos/Dieta comun 3 días PREVIOS AL ESTUDIO.docx")
+
+elif opcion == "MI PREPARACIÓN":
+    st.subheader("Generar mi plan de preparación")
+
+    familia = st.selectbox(
+        "Tipo de preparación indicada",
+        ["FOSFATOS", "PICOSULFATO", "POLIETINELGLICOL", "BAREX KIT"]
+    )
+
+    franja = st.radio(
+        "Franja horaria del estudio",
+        ["7 A 12", "12 A 16", "16 A 19"]
+    )
+
+    if st.button("GENERAR PLAN"):
+        # Lógica de selección de archivo
+        archivo = ""
+        if familia == "BAREX KIT":
+            archivo = "textos/BAREX KIT DE 7 A 12.docx" if franja == "7 A 12" else "textos/BAREX KIT DE 12 A 19.docx"
+        elif familia == "FOSFATOS":
+            archivo = f"textos/FOSFATOS DE {franja}.docx"
+        elif familia == "PICOSULFATO":
+            archivo = f"textos/PICOSULFATO DE {franja}.docx"
+        elif familia == "POLIETINELGLICOL":
+            archivo = f"textos/POLIETINELGLICOL 4 litros de {franja}HS.docx"
+
+        st.success("Plan generado. Puede leerlo aquí o descargarlo en PDF.")
+        
+        st.header("Tu Preparación Específica")
+        mostrar_docx(archivo)
+
+        # Generar PDF con los textos fijos + el archivo específico
+        secciones_para_pdf = {
+            "Indicaciones Previas": TEXTO_ANTES,
+            "Tu Preparación Detallada": texto_docx(archivo),
+            "Cuidados Post-Estudio": TEXTO_POST
+        }
+
+        try:
+            ruta_pdf = generar_pdf_profesional(f"{familia} - {franja}HS", secciones_para_pdf)
+            with open(ruta_pdf, "rb") as f:
+                st.download_button(
+                    label="📩 DESCARGAR MI PLAN EN PDF",
+                    data=f.read(),
+                    file_name=f"Plan_Endoscopia_{familia}.pdf",
+                    mime="application/pdf"
+                )
+        except Exception as e:
+            st.error(f"Error al generar el PDF: {e}")
+
+elif opcion == "DESPUÉS DE MI ENDOSCOPIA":
+    st.markdown("## 🏁 Recomendaciones Post-Estudio")
+    st.markdown(f"""
+    <div style="background:white; padding:30px; border-radius:20px; line-height:1.8; font-size:22px; border-left:10px solid #2ecc71; box-shadow:0px 10px 20px rgba(0,0,0,0.05);">
+        {TEXTO_POST.replace(chr(10), '<br>')}
+    </div>
+    """, unsafe_allow_html=True)
+
 # --------------------------------------------------
 # ANTES DEL ESTUDIO
 # --------------------------------------------------
