@@ -4,8 +4,12 @@ from docx import Document
 import os
 import re
 from reportlab.lib.pagesizes import A4
-from reportlab.pdfgen import canvas
+from reportlab.lib.styles import getSampleStyleSheet, ParagraphStyle
+from reportlab.lib.enums import TA_LEFT
+from reportlab.platypus import SimpleDocTemplate, Paragraph, Spacer
 import tempfile
+
+
 
 st.set_page_config(page_title="Asistente Endoscopía", layout="wide")
 
@@ -261,11 +265,14 @@ def texto_docx(ruta):
 # --------------------------------------------------
 # GENERAR PDF PROFESIONAL
 # --------------------------------------------------
+
 def generar_pdf_profesional(titulo_plan, secciones):
+    # Crear un archivo temporal que no se borre inmediatamente
     tmp = tempfile.NamedTemporaryFile(delete=False, suffix=".pdf")
     doc = SimpleDocTemplate(tmp.name, pagesize=A4, rightMargin=50, leftMargin=50, topMargin=50, bottomMargin=50)
     
     styles = getSampleStyleSheet()
+    # Estilos personalizados
     estilo_titulo = ParagraphStyle('Titulo', parent=styles['Heading1'], fontSize=18, spaceAfter=20, textColor="#1a5c96")
     estilo_subtitulo = ParagraphStyle('Subtitulo', parent=styles['Heading2'], fontSize=14, spaceBefore=15, spaceAfter=10, textColor="#4da6ff")
     estilo_texto = ParagraphStyle('Texto', parent=styles['Normal'], fontSize=11, leading=14, alignment=TA_LEFT, spaceAfter=8)
@@ -274,10 +281,11 @@ def generar_pdf_profesional(titulo_plan, secciones):
     elementos.append(Paragraph(f"PLAN DE PREPARACIÓN: {titulo_plan}", estilo_titulo))
     
     for nombre_seccion, contenido in secciones.items():
-        if contenido.strip():
+        if contenido and contenido.strip():
             elementos.append(Paragraph(nombre_seccion.upper(), estilo_subtitulo))
-            # Procesar saltos de línea para el PDF
-            for linea in contenido.split('\n'):
+            # Dividir el texto por líneas para mantener el formato
+            lineas = contenido.split('\n')
+            for linea in lineas:
                 if linea.strip():
                     elementos.append(Paragraph(linea, estilo_texto))
             elementos.append(Spacer(1, 12))
@@ -458,39 +466,30 @@ elif opcion=="MI PREPARACIÓN":
     metformina=st.checkbox("Metformina",disabled=sin_medicacion)
 
     if st.button("GENERAR PLAN"):
+        # ... (tus mostrar_docx y lógica de 'archivo' aquí) ...
 
-        st.header("Dieta 3 días previos")
+        # 1. Recolectamos todo el texto de los .docx
+        secciones_para_pdf = {
+            "Alertas Importantes": texto_docx("textos/Alertas Generales a todas las preparaciones.docx"),
+            "Dieta Previa": texto_docx("textos/Dieta comun 3 días PREVIOS AL ESTUDIO.docx"),
+            "Instrucciones de Preparación": texto_docx(archivo),
+            "Ayuno": texto_docx("textos/AYUNO PARA TODAS LA PREPARACIONES.docx"),
+            "Cuidados Post-Estudio": texto_docx("textos/despues de mi endoscopia.docx")
+        }
 
-        mostrar_docx("textos/Dieta comun 3 días PREVIOS AL ESTUDIO.docx")
+        # 2. Generamos el archivo físico
+        ruta_archivo_pdf = generar_pdf_profesional(f"{familia} - {franja}HS", secciones_para_pdf)
 
-        if familia=="BAREX KIT":
-
-            if franja=="7 A 12":
-                archivo="textos/BAREX KIT DE 7 A 12.docx"
-            else:
-                archivo="textos/BAREX KIT DE 12 A 19.docx"
-
-        elif familia=="FOSFATOS":
-            archivo=f"textos/FOSFATOS DE {franja}.docx"
-
-        elif familia=="PICOSULFATO":
-            archivo=f"textos/PICOSULFATO DE {franja}.docx"
-
-        elif familia=="POLIETINELGLICOL":
-            archivo=f"textos/POLIETINELGLICOL 4 litros de {franja}HS.docx"
-
-        st.header("Preparación indicada")
-
-        mostrar_docx(archivo)
-
-        st.header("Ayuno")
-
-        mostrar_docx("textos/AYUNO PARA TODAS LA PREPARACIONES.docx")
-
-        titulo_protocolo = f"{familia} {franja}"
-
-        texto_pdf=f"""
-{titulo_protocolo}
+        # 3. Ofrecemos la descarga
+        with open(ruta_archivo_pdf, "rb") as f:
+            pdf_data = f.read()
+            
+        st.download_button(
+            label="📩 DESCARGAR MI PLAN EN PDF",
+            data=pdf_data,
+            file_name=f"Plan_Endoscopia_{familia}.pdf",
+            mime="application/pdf"
+        )
 
 ANTES DEL ESTUDIO
 {texto_docx("textos/Alertas Generales a todas las preparaciones.docx")}
