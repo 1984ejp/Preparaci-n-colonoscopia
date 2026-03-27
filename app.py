@@ -1,5 +1,4 @@
 import streamlit as st
-import base64
 from docx import Document
 import os
 import tempfile
@@ -39,12 +38,12 @@ def generar_pdf_profesional(titulo_plan, secciones):
     doc = SimpleDocTemplate(tmp.name, pagesize=A4)
     styles = getSampleStyleSheet()
 
-    estilo_titulo = ParagraphStyle('Titulo', parent=styles['Heading1'], fontSize=18)
-    estilo_subtitulo = ParagraphStyle('Subtitulo', parent=styles['Heading2'], fontSize=14)
+    estilo_titulo = ParagraphStyle('Titulo', parent=styles['Heading1'], fontSize=16)
+    estilo_subtitulo = ParagraphStyle('Subtitulo', parent=styles['Heading2'], fontSize=13)
     estilo_texto = ParagraphStyle('Texto', parent=styles['Normal'], fontSize=11, alignment=TA_LEFT)
 
     elementos = []
-    elementos.append(Paragraph(f"PLAN: {titulo_plan}", estilo_titulo))
+    elementos.append(Paragraph(f"PLAN DE PREPARACIÓN: {titulo_plan}", estilo_titulo))
 
     for nombre, contenido in secciones.items():
         if contenido:
@@ -59,7 +58,7 @@ def generar_pdf_profesional(titulo_plan, secciones):
     return tmp.name
 
 # --------------------------------------------------
-# UI DOCX
+# MOSTRAR DOCX
 # --------------------------------------------------
 
 def mostrar_docx(ruta):
@@ -88,12 +87,32 @@ if st.button("🔄 Reiniciar"):
 st.divider()
 
 # --------------------------------------------------
-# ANTES
+# ANTES (SIN ARCHIVO)
 # --------------------------------------------------
 
 if opcion == "ANTES DE MI ENDOSCOPIA":
+
     st.header("Alertas Generales")
-    mostrar_docx("textos/Alertas Generales a todas las preparaciones.docx")
+
+    st.markdown("""
+1. Si toma medicación que altere la coagulación de la sangre debe recordárselo a su médico con anticipación y consultarlo con su médico hematólogo.  
+2. Debe traer la orden del estudio vigente y debidamente autorizada si corresponde.  
+3. Debe concurrir acompañado.  
+
+**PODRÁ REALIZAR EL ESTUDIO SI CUMPLE CON LOS ÍTEMS ANTERIORES**
+
+• 8 hs antes del estudio suspender todo alimento sólido y lácteo. Puede continuar con agua y/o Gatorade (manzana o limón) hasta 4 hs antes.  
+• NO debe concurrir con las uñas pintadas o esmaltadas.  
+• DEBE quitarse anillos, aros y/o piercings.  
+
+**TENER EN CUENTA:**
+
+- Esta preparación produce diarrea intensa → realizarla en domicilio.  
+- Durante el estudio pueden extraerse pólipos o biopsias.  
+- Riesgo de perforación:
+    - Terapéutica: 0.15% – 2.14%  
+    - Diagnóstica: ~1 cada 2000 estudios  
+""")
 
 # --------------------------------------------------
 # PREPARACIÓN
@@ -111,7 +130,7 @@ elif opcion == "MI PREPARACIÓN":
         ["7 A 12", "12 A 16", "16 A 19"]
     )
 
-    # Archivo
+    # Definir archivo
     if familia == "BAREX KIT":
         archivo_prep = f"textos/BAREX KIT DE {'7 A 12' if franja=='7 A 12' else '12 A 19'}.docx"
     elif familia == "POLIETILENGLICOL":
@@ -121,48 +140,51 @@ elif opcion == "MI PREPARACIÓN":
 
     st.divider()
 
-    st.subheader("1. Alertas")
-    mostrar_docx("textos/Alertas Generales a todas las preparaciones.docx")
-
-    st.subheader("2. Dieta")
-    mostrar_docx("textos/Dieta comun 3 días PREVIOS AL ESTUDIO.docx")
-
-    st.subheader("3. Preparación")
+    st.subheader("Preparación")
     mostrar_docx(archivo_prep)
 
-    st.subheader("4. Ayuno")
-    mostrar_docx("textos/AYUNO PARA TODAS LA PREPARACIONES.docx")
-
-    st.subheader("5. Después del estudio")
+    st.subheader("Después del estudio")
     mostrar_docx("textos/despues de mi endoscopia.docx")
 
     st.divider()
 
-    # PDF
-    if st.button("📄 Generar PDF"):
+    # PDF directo (UN SOLO BOTÓN)
+    nombre_plan = f"{familia} {franja}"
 
-        datos_pdf = {
-            "Alertas": texto_docx("textos/Alertas Generales a todas las preparaciones.docx"),
-            "Dieta": texto_docx("textos/Dieta comun 3 días PREVIOS AL ESTUDIO.docx"),
-            "Preparación": texto_docx(archivo_prep),
-            "Ayuno": texto_docx("textos/AYUNO PARA TODAS LA PREPARACIONES.docx"),
-            "Después": texto_docx("textos/despues de mi endoscopia.docx")
-        }
+    datos_pdf = {
+        "Antes del Estudio": """
+Si toma medicación que altere la coagulación consulte con su médico.
+Debe traer orden vigente.
+Debe concurrir acompañado.
 
-        ruta_pdf = generar_pdf_profesional(f"{familia} {franja}", datos_pdf)
+8 hs antes: sin sólidos ni lácteos.
+Puede tomar agua o Gatorade hasta 4 hs antes.
 
-        with open(ruta_pdf, "rb") as f:
-            st.download_button(
-                "⬇️ Descargar PDF",
-                f.read(),
-                file_name="plan_endoscopia.pdf",
-                mime="application/pdf"
-            )
+No uñas pintadas.
+Retirar anillos y piercings.
+
+Produce diarrea intensa.
+Puede haber biopsias o polipectomía.
+Riesgo bajo de perforación.
+""",
+        "Después del Estudio": texto_docx("textos/despues de mi endoscopia.docx")
+    }
+
+    ruta_pdf = generar_pdf_profesional(nombre_plan, datos_pdf)
+
+    with open(ruta_pdf, "rb") as f:
+        st.download_button(
+            label="📄 Descargar PDF",
+            data=f.read(),
+            file_name=f"Plan_{familia}_{franja.replace(' ','_')}.pdf",
+            mime="application/pdf"
+        )
 
 # --------------------------------------------------
 # DESPUÉS
 # --------------------------------------------------
 
 elif opcion == "DESPUÉS DE MI ENDOSCOPIA":
-    st.header("Indicaciones")
+
+    st.header("Indicaciones después del estudio")
     mostrar_docx("textos/despues de mi endoscopia.docx")
