@@ -4,217 +4,528 @@ from docx import Document
 import os
 import re
 from reportlab.lib.pagesizes import A4
-from reportlab.lib.styles import getSampleStyleSheet, ParagraphStyle
-from reportlab.platypus import SimpleDocTemplate, Paragraph, Spacer, PageBreak
-from reportlab.lib.enums import TA_LEFT, TA_CENTER
+from reportlab.pdfgen import canvas
 import tempfile
 
-# 1. CONFIGURACIÓN DE PÁGINA
-st.set_page_config(page_title="Asistente Endoscopía", layout="wide", initial_sidebar_state="collapsed")
+st.set_page_config(page_title="Asistente Endoscopía", layout="wide")
 
 # --------------------------------------------------
-# 2. FUNCIONES DE SISTEMA (BÚSQUEDA ROBUSTA)
+# BUSCAR ARCHIVO ROBUSTO
+# --------------------------------------------------
+
+def buscar_alertas():
+
+    carpeta="textos"
+
+    if not os.path.exists(carpeta):
+        return "textos/Alertas Generales a todas las preparaciones.docx"
+
+    for archivo in os.listdir(carpeta):
+
+        if "alertas" in archivo.lower():
+
+            return os.path.join(carpeta,archivo)
+
+    return "textos/Alertas Generales a todas las preparaciones.docx"
+
+# --------------------------------------------------
+# REINICIAR
 # --------------------------------------------------
 
 def reiniciar():
     st.session_state.clear()
     st.rerun()
 
-def obtener_ruta_segura(nombre_archivo):
-    """Busca archivos en la raíz o en la carpeta 'textos'."""
-    rutas = [
-        nombre_archivo,
-        os.path.join("textos", nombre_archivo),
-        os.path.join(os.path.dirname(__file__), "textos", nombre_archivo) if "__file__" in locals() else None
-    ]
-    for r in rutas:
-        if r and os.path.exists(r):
-            return r
-    return None
-
-def extraer_texto_docx(nombre_archivo):
-    ruta = obtener_ruta_segura(nombre_archivo)
-    if not ruta: return ""
-    try:
-        doc = Document(ruta)
-        return "\n".join([p.text.strip() for p in doc.paragraphs if p.text.strip()])
-    except: return ""
-
 # --------------------------------------------------
-# 3. ESTILO CSS RESPONSIVO (ADAPTABILIDAD TOTAL)
+# ESTILO
 # --------------------------------------------------
 
 st.markdown("""
 <style>
-    /* Fondo y Base */
-    .stApp { background: linear-gradient(180deg, #e9f0f7, #dfe8f3); }
-    
-    /* Tipografía Adaptable */
-    html, body, [class*="css"] { 
-        font-size: 20px; 
-        color: #2c3e50; 
-        font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-    }
 
-    /* Títulos Responsivos */
-    h1 { font-size: 3.5rem !important; font-weight: 800; color: #1a5c96; margin-bottom: 0.5rem; }
-    
-    /* Contenedores */
-    .card {
-        background: white; padding: 2rem; border-radius: 25px;
-        box-shadow: 0px 12px 30px rgba(0,0,0,0.1); margin-bottom: 2rem;
-    }
+.stApp{
+background:linear-gradient(180deg,#e9f0f7,#dfe8f3);
+}
 
-    /* Burbujas de Información (Antes/Después/Prep) */
-    .burbuja-comun {
-        background: white; padding: 1.5rem; border-radius: 20px;
-        margin-bottom: 1.2rem; border-left: 10px solid #4da6ff;
-        box-shadow: 0px 6px 15px rgba(0,0,0,0.06);
-        line-height: 1.6; font-size: 1.4rem;
-    }
-    .burbuja-alerta {
-        background: #fffafa; padding: 1.5rem; border-radius: 20px;
-        margin-bottom: 1.2rem; border-left: 10px solid #ff4d4d;
-        box-shadow: 0px 6px 15px rgba(255, 77, 77, 0.1);
-        line-height: 1.6; font-size: 1.4rem;
-    }
+/* escritorio */
+html,body,[class*="css"]{
+font-size:22px !important;
+}
 
-    /* Botones Adaptables */
-    .stButton button {
-        font-size: 1.3rem !important; font-weight: bold; padding: 1rem;
-        border-radius: 15px; background: #4da6ff; color: white;
-        border: none; width: 100%; transition: 0.3s;
-    }
-    .stButton button:hover { background: #1a8cff; transform: scale(1.02); }
+h1{
+font-size:52px !important;
+}
 
-    /* Media Queries para Móviles */
-    @media (max-width: 768px) {
-        html, body, [class*="css"] { font-size: 16px !important; }
-        h1 { font-size: 2.2rem !important; text-align: center; }
-        .burbuja-comun, .burbuja-alerta { font-size: 1.1rem !important; padding: 1rem !important; }
-        .hide-mobile { display: none; }
-        .card { padding: 1.2rem !important; }
-    }
+/* botones */
+.stButton button{
+font-size:22px !important;
+padding:14px 26px;
+border-radius:14px;
+background:#4da6ff;
+color:white;
+border:none;
+width:100%;
+}
+
+/* tarjeta */
+.card{
+background:white;
+padding:28px;
+border-radius:22px;
+box-shadow:0px 8px 24px rgba(0,0,0,0.08);
+}
+
+/* RESPONSIVE PARA CELULAR */
+
+@media (max-width: 768px){
+
+html,body,[class*="css"]{
+font-size:18px !important;
+}
+
+h1{
+font-size:32px !important;
+}
+
+.card{
+padding:18px;
+}
+
+.stButton button{
+font-size:18px !important;
+padding:12px;
+}
+
+}
+
 </style>
+""",unsafe_allow_html=True)
+# --------------------------------------------------
+# DETECTAR ICONOS
+# --------------------------------------------------
+
+def detectar_icono(texto):
+
+    t=texto.lower()
+
+    if "no debe" in t or "quitar" in t:
+        return "🚫","#ffeaea","#ff4d4d"
+
+    if "riesgo" in t or "perforación" in t or "biopsia" in t or "pólipo" in t or "recuerde" in t:
+        return "⚠️","#fff7cc","#f0ad4e"
+
+    if "hs" in t:
+        return "⏰","white","#4da6ff"
+
+    return "✅","white","#4da6ff"
+# --------------------------------------------------
+# ALERTAS ANTES DE LA ENDOSCOPIA
+# --------------------------------------------------
+
+def obtener_alertas():
+
+    return [
+
+        ("⚠️","Si toma medicación que altere la coagulación de la sangre debe recordárselo a su médico con anticipación y consultarlo con su médico hematólogo."),
+
+        ("📄","Debe traer la orden del estudio vigente y debidamente autorizada si corresponde."),
+
+        ("👥","Debe concurrir acompañado."),
+
+        ("✅","PODRÁ REALIZAR EL ESTUDIO SI CUMPLE CON LOS 4 ÍTEMS ANTERIORES."),
+
+        ("⏰","8 hs antes del estudio suspende todo alimento sólido y lácteo. Puede continuar con agua y/o Gatorade (sabor manzana o limón) hasta 4 hs antes del procedimiento."),
+
+        ("🚫","NO debe concurrir con las uñas pintadas o esmaltadas."),
+
+        ("🚫","DEBE quitarse los anillos, aros y/o piercings antes del estudio."),
+
+        ("💧","Esta preparación produce una diarrea intensa, por lo que debe realizarla en su domicilio y no en su ámbito laboral."),
+
+        ("⚠️","Es importante que sepa que durante el estudio se pueden extraer pólipos y tomar biopsias. Entre los riesgos potenciales del método está la perforación microscópica o completa del intestino grueso. La incidencia de perforación por colonoscopía es más común después de una terapéutica y oscila entre 0.15% y 2.14% según las series publicadas. Para una colonoscopía diagnóstica la presencia de complicaciones es aproximadamente 1 cada 2000 exploraciones.")
+
+    ]
+def mostrar_alertas():
+
+    alertas = obtener_alertas()
+
+    for icono,texto in alertas:
+
+        st.markdown(f"""
+        <div style="
+        background:white;
+        padding:24px;
+        border-radius:16px;
+        margin-bottom:18px;
+        line-height:1.7;
+        font-size:24px;
+        box-shadow:0px 6px 16px rgba(0,0,0,0.07);
+        border-left:8px solid #4da6ff;">
+        <b>{icono}</b> {texto}
+        </div>
+        """,unsafe_allow_html=True)
+# --------------------------------------------------
+# MOSTRAR DOCX
+# --------------------------------------------------
+
+def mostrar_docx(ruta):
+
+    # ruta absoluta para que funcione en Streamlit Cloud
+    base_dir = os.path.dirname(os.path.abspath(__file__))
+    ruta_completa = os.path.join(base_dir, ruta)
+
+    # si el archivo no existe intentar encontrar el de alertas
+    if not os.path.exists(ruta_completa):
+
+        carpeta = os.path.join(base_dir, "textos")
+
+        if os.path.exists(carpeta):
+
+            nombre = os.path.basename(ruta).lower()
+
+            for archivo in os.listdir(carpeta):
+
+                if "alertas" in archivo.lower():
+                    ruta_completa = os.path.join(carpeta, archivo)
+                    break
+
+    # si aún no existe mostrar error
+    if not os.path.exists(ruta_completa):
+        st.error(f"No se encontró el archivo: {ruta}")
+        return
+
+    doc = Document(ruta_completa)
+
+    textos = []
+    buffer = ""
+
+    for p in doc.paragraphs:
+
+        texto = p.text.strip()
+
+        if texto == "":
+            continue
+
+        if texto.lower().startswith("y/o") or texto.lower().startswith("o "):
+            buffer += " " + texto
+        else:
+
+            if buffer != "":
+                textos.append(buffer)
+
+            buffer = texto
+
+    if buffer != "":
+        textos.append(buffer)
+
+    for texto in textos:
+
+        icono, fondo, color = detectar_icono(texto)
+
+        st.markdown(f"""
+        <div style="
+        background:{fondo};
+        padding:24px;
+        border-radius:16px;
+        margin-bottom:18px;
+        line-height:1.7;
+        font-size:24px;
+        box-shadow:0px 6px 16px rgba(0,0,0,0.07);
+        border-left:8px solid {color};">
+        <b>{icono}</b> {texto}
+        </div>
 """, unsafe_allow_html=True)
 
 # --------------------------------------------------
-# 4. COMPONENTES VISUALES (ANTES / DESPUES)
+# EXTRAER TEXTO DOCX
 # --------------------------------------------------
 
-def mostrar_alertas_antes():
-    # TEXTOS COMPLETOS (SISTEMA INTEGRAL)
-    alertas = [
-        ("⚠️", "Si toma medicación que altere la coagulación de la sangre debe recordárselo a su médico con anticipación y consultarlo con su médico hematólogo."),
-        ("📄", "Debe traer la orden del estudio vigente y debidamente autorizada si corresponde."),
-        ("👥", "Debe concurrir acompañado."),
-        ("✅", "PODRÁ REALIZAR EL ESTUDIO SI CUMPLE CON LOS 4 ÍTEMS ANTERIORES."),
-        ("⏰", "8 hs antes del estudio suspende todo alimento sólido y lácteo. Puede continuar con agua y/o Gatorade (sabor manzana o limón) hasta 4 hs antes del procedimiento."),
-        ("🚫", "NO debe concurrir con las uñas pintadas o esmaltadas."),
-        ("🚫", "DEBE quitarse los anillos, aros y/o piercings antes del estudio."),
-        ("💧", "Esta preparación produce una diarrea intensa, por lo que debe realizarla en su domicilio y no en su ámbito laboral."),
-        ("⚠️", "Es importante que sepa que durante el estudio se pueden extraer pólipos y tomar biopsias. La incidencia de perforación por colonoscopía oscila entre 0.15% y 2.14% según terapéutica.")
-    ]
-    for icono, texto in alertas:
-        estilo = "burbuja-alerta" if icono in ["🚫", "⚠️"] else "burbuja-comun"
-        st.markdown(f'<div class="{estilo}"><b>{icono}</b> {texto}</div>', unsafe_allow_html=True)
+def texto_docx(ruta):
 
-def mostrar_post_endoscopia(archivo):
-    ruta = obtener_ruta_segura(archivo)
-    if not ruta: return
-    doc = Document(ruta)
-    parrafos = [p.text.strip() for p in doc.paragraphs if p.text.strip()]
+    if not os.path.exists(ruta):
+        return ""
+
+    doc=Document(ruta)
+
+    texto=[]
+
+    for p in doc.paragraphs:
+
+        t=p.text.strip()
+
+        if t!="":
+            texto.append(t)
+
+    return "\n".join(texto)
+
+# --------------------------------------------------
+# GENERAR PDF PROFESIONAL
+# --------------------------------------------------
+def generar_pdf_profesional(titulo_plan, secciones):
+    tmp = tempfile.NamedTemporaryFile(delete=False, suffix=".pdf")
+    doc = SimpleDocTemplate(tmp.name, pagesize=A4, rightMargin=50, leftMargin=50, topMargin=50, bottomMargin=50)
     
-    secciones = [
-        "1. Observaciones iniciales", "2. Cuidados en el domicilio",
-        "3. Signos de alarma – acudir de inmediato", "4. Contacto de urgencia",
-        "5. Indicaciones primeras 12 horas", "6. Toma de muestras – Anatomía Patológica"
-    ]
+    styles = getSampleStyleSheet()
+    estilo_titulo = ParagraphStyle('Titulo', parent=styles['Heading1'], fontSize=18, spaceAfter=20, textColor="#1a5c96")
+    estilo_subtitulo = ParagraphStyle('Subtitulo', parent=styles['Heading2'], fontSize=14, spaceBefore=15, spaceAfter=10, textColor="#4da6ff")
+    estilo_texto = ParagraphStyle('Texto', parent=styles['Normal'], fontSize=11, leading=14, alignment=TA_LEFT, spaceAfter=8)
+
+    elementos = []
+    elementos.append(Paragraph(f"PLAN DE PREPARACIÓN: {titulo_plan}", estilo_titulo))
     
-    bloques = {s: "" for s in secciones}
-    actual = None
+    for nombre_seccion, contenido in secciones.items():
+        if contenido.strip():
+            elementos.append(Paragraph(nombre_seccion.upper(), estilo_subtitulo))
+            # Procesar saltos de línea para el PDF
+            for linea in contenido.split('\n'):
+                if linea.strip():
+                    elementos.append(Paragraph(linea, estilo_texto))
+            elementos.append(Spacer(1, 12))
+
+    doc.build(elementos)
+    return tmp.name
+
+# --------------------------------------------------
+# POST ENDOSCOPIA
+# --------------------------------------------------
+
+def mostrar_post_endoscopia(ruta):
+
+    doc=Document(ruta)
+
+    parrafos=[p.text.strip() for p in doc.paragraphs if p.text.strip()!=""]
+
+    bloques={}
+    titulo=None
+
     for p in parrafos:
-        p_low = p.lower()
-        if "observaciones iniciales" in p_low: actual = secciones[0]
-        elif "cuidados en el domicilio" in p_low: actual = secciones[1]
-        elif "signos de alarma" in p_low: actual = secciones[2]
-        elif "contacto de urgencia" in p_low: actual = secciones[3]
-        elif "12 horas" in p_low: actual = secciones[4]
-        elif "anatomía patológica" in p_low: actual = secciones[5]
-        elif actual: bloques[actual] += p + " "
 
-    for titulo in secciones:
-        cont = bloques[titulo].strip()
-        if cont:
-            color = "#ff4d4d" if "alarma" in titulo.lower() else "#4da6ff"
-            st.markdown(f"""
-                <div style="background:white; padding:1.5rem; border-radius:20px; margin-bottom:1.2rem; 
-                border-left:10px solid {color}; box-shadow:0px 8px 20px rgba(0,0,0,0.05);">
-                    <b style="font-size:1.4rem; color:#1a5c96;">{titulo}</b><br>
-                    <span style="font-size:1.2rem; color:#34495e;">{cont}</span>
-                </div>
-            """, unsafe_allow_html=True)
+        if "observaciones iniciales" in p.lower():
+            titulo="1. Observaciones iniciales"
+            bloques[titulo]=""
 
-# --------------------------------------------------
-# 5. LOGICA DE INTERFAZ Y NAVEGACIÓN
-# --------------------------------------------------
+        elif "cuidados en el domicilio" in p.lower():
+            titulo="2. Cuidados en el domicilio"
+            bloques[titulo]=""
 
-col_main, col_img = st.columns([1.2, 1])
+        elif "signos de alarma" in p.lower():
+            titulo="3. Signos de alarma – acudir de inmediato"
+            bloques[titulo]=""
 
-with col_main:
-    st.markdown('<div class="card">', unsafe_allow_html=True)
-    st.markdown("# Hola, soy Francisco 👋")
-    opcion = st.radio("Elegí una opción:", 
-                      ["Seleccionar...", "ANTES DE MI ENDOSCOPIA", "MI PREPARACIÓN", "DESPUÉS DE MI ENDOSCOPIA"])
-    if st.button("🔄 REINICIAR"): reiniciar()
-    st.markdown('</div>', unsafe_allow_html=True)
+        elif "contacto de urgencia" in p.lower():
+            titulo="4. Contacto de urgencia"
+            bloques[titulo]=""
 
-with col_img:
-    img_path = obtener_ruta_segura("francisco.png")
-    if img_path:
-        with open(img_path, "rb") as f:
-            b64 = base64.b64encode(f.read()).decode()
-            st.markdown(f"""
-                <div class="hide-mobile" style="text-align:center;">
-                    <img src="data:image/png;base64,{b64}" style="width:100%; max-width:420px; border-radius:30px; box-shadow:0 10px 30px rgba(0,0,0,0.1);">
-                </div>
-            """, unsafe_allow_html=True)
+        elif "12 horas" in p.lower():
+            titulo="5. Indicaciones primeras 12 horas"
+            bloques[titulo]=""
 
-st.divider()
+        elif "anatomía patológica" in p.lower():
+            titulo="6. Toma de muestras – Anatomía Patológica"
+            bloques[titulo]=""
 
-if opcion == "ANTES DE MI ENDOSCOPIA":
-    mostrar_alertas_antes()
-    st.header("🥗 Dieta Previa")
-    texto_dieta = extraer_texto_docx("Dieta comun 3 días PREVIOS AL ESTUDIO.docx")
-    if texto_dieta:
-        for p in texto_dieta.split("\n"):
-            if p.strip(): st.markdown(f'<div class="burbuja-comun">✅ {p}</div>', unsafe_allow_html=True)
-
-elif opcion == "MI PREPARACIÓN":
-    c1, c2 = st.columns(2)
-    with c1:
-        familia = st.selectbox("Medicamento:", ["FOSFATOS", "PICOSULFATO", "POLIETINELGLICOL", "BAREX KIT"])
-        franja = st.radio("Turno:", ["7 A 12", "12 A 16", "16 A 19"])
-    with c2:
-        antecedentes = st.multiselect("Antecedentes:", ["Diabetes", "Insuficiencia Renal", "Insuficiencia Cardíaca"])
-    
-    if familia == "FOSFATOS" and any(x in antecedentes for x in ["Insuficiencia Renal", "Insuficiencia Cardíaca"]):
-        st.markdown('<div class="burbuja-alerta">🚨 <b>ERROR MÉDICO:</b> No puede usar FOSFATOS.</div>', unsafe_allow_html=True)
-    elif st.button("GENERAR MI PLAN"):
-        if familia == "BAREX KIT":
-            archivo = f"BAREX KIT DE {'7 A 12' if franja == '7 A 12' else '12 A 19'}.docx"
-        elif familia == "POLIETINELGLICOL":
-            archivo = f"POLIETINELGLICOL 4 litros de {franja}HS.docx"
         else:
-            archivo = f"{familia} DE {franja}.docx"
-        
-        texto_p = extraer_texto_docx(archivo)
-        if texto_p:
-            for line in texto_p.split("\n"):
-                if line.strip():
-                    icono = "🚫" if any(x in line.lower() for x in ["no", "evite", "suspenda"]) else "✅"
-                    st.markdown(f'<div class="burbuja-comun"><b>{icono}</b> {line}</div>', unsafe_allow_html=True)
 
-elif opcion == "DESPUÉS DE MI ENDOSCOPIA":
-    st.header("🏠 Cuidados Post-Estudio")
-    mostrar_post_endoscopia("despues de mi endoscopia.docx")
+            if titulo:
+                bloques[titulo]+=p+" "
+
+    for t,c in bloques.items():
+
+        st.markdown(f"""
+        <div style="
+        background:white;
+        padding:26px;
+        border-radius:18px;
+        margin-bottom:20px;
+        font-size:26px;
+        line-height:1.8;
+        border-left:8px solid #4da6ff;
+        box-shadow:0px 6px 16px rgba(0,0,0,0.07);">
+        <b>✅ {t}</b><br><br>
+        {c}
+        </div>
+        """,unsafe_allow_html=True)
+
+# --------------------------------------------------
+# IMAGEN
+# --------------------------------------------------
+
+def get_img64(path):
+
+    if not os.path.exists(path):
+        return None
+
+    with open(path,"rb") as f:
+        return base64.b64encode(f.read()).decode()
+
+img=get_img64("francisco.png")
+
+# --------------------------------------------------
+# LAYOUT
+# --------------------------------------------------
+
+col1,col2=st.columns([1.1,1])
+
+with col1:
+
+    st.markdown('<div class="card">',unsafe_allow_html=True)
+
+    st.markdown("# Hola, soy Francisco 👋")
+    st.write("Voy a ayudarte paso a paso con tu estudio.")
+
+    opcion=st.radio(
+        "Elegí una opción:",
+        [
+        "Seleccionar...",
+        "ANTES DE MI ENDOSCOPIA",
+        "MI PREPARACIÓN",
+        "DESPUÉS DE MI ENDOSCOPIA"
+        ]
+    )
+
+    st.markdown("<br>",unsafe_allow_html=True)
+
+    c1,c2,c3=st.columns([1,1,1])
+
+    with c2:
+        if st.button("🔄 REINICIAR"):
+            reiniciar()
+
+    st.markdown('</div>',unsafe_allow_html=True)
+
+with col2:
+
+    if img:
+        st.markdown("""
+        <style>
+        @media (max-width:768px){
+        .hide-mobile{display:none;}
+        }
+        </style>
+        """,unsafe_allow_html=True)
+
+        st.markdown(f"""
+        <div class="hide-mobile" style="display:flex;justify-content:center;">
+        <img src="data:image/png;base64,{img}" style="width:100%;max-width:100%;border-radius:24px;">
+        </div>
+        """,unsafe_allow_html=True)
+# --------------------------------------------------
+# ANTES DEL ESTUDIO
+# --------------------------------------------------
+
+if opcion=="ANTES DE MI ENDOSCOPIA":
+
+    mostrar_alertas()
+    st.header("Dieta 3 días previos")
+
+    mostrar_docx("textos/Dieta comun 3 días PREVIOS AL ESTUDIO.docx")
+
+# --------------------------------------------------
+# MI PREPARACIÓN
+# --------------------------------------------------
+
+elif opcion=="MI PREPARACIÓN":
+
+    st.subheader("Generar mi plan de preparación")
+
+    familia=st.selectbox(
+        "Tipo de preparación indicada",
+        ["FOSFATOS","PICOSULFATO","POLIETINELGLICOL","BAREX KIT"]
+    )
+
+    franja=st.radio(
+        "Franja horaria del estudio",
+        ["7 A 12","12 A 16","16 A 19"]
+    )
+
+    st.markdown("### Antecedentes médicos")
+
+    sin=st.checkbox("Sin antecedentes")
+
+    renal=st.checkbox("Insuficiencia renal",disabled=sin)
+    cardiaca=st.checkbox("Insuficiencia cardíaca",disabled=sin)
+    diabetes=st.checkbox("Diabetes",disabled=sin)
+    hipertension=st.checkbox("Hipertensión arterial",disabled=sin)
+
+    st.markdown("### Medicación actual")
+
+    sin_medicacion=st.checkbox("Sin medicación")
+
+    aspirina=st.checkbox("Aspirina",disabled=sin_medicacion)
+    clopidogrel=st.checkbox("Clopidogrel",disabled=sin_medicacion)
+    sintrom=st.checkbox("Sintrom",disabled=sin_medicacion)
+    insulina=st.checkbox("Insulina",disabled=sin_medicacion)
+    metformina=st.checkbox("Metformina",disabled=sin_medicacion)
+
+    if st.button("GENERAR PLAN"):
+
+        st.header("Dieta 3 días previos")
+
+        mostrar_docx("textos/Dieta comun 3 días PREVIOS AL ESTUDIO.docx")
+
+        if familia=="BAREX KIT":
+
+            if franja=="7 A 12":
+                archivo="textos/BAREX KIT DE 7 A 12.docx"
+            else:
+                archivo="textos/BAREX KIT DE 12 A 19.docx"
+
+        elif familia=="FOSFATOS":
+            archivo=f"textos/FOSFATOS DE {franja}.docx"
+
+        elif familia=="PICOSULFATO":
+            archivo=f"textos/PICOSULFATO DE {franja}.docx"
+
+        elif familia=="POLIETINELGLICOL":
+            archivo=f"textos/POLIETINELGLICOL 4 litros de {franja}HS.docx"
+
+        st.header("Preparación indicada")
+
+        mostrar_docx(archivo)
+
+        st.header("Ayuno")
+
+        mostrar_docx("textos/AYUNO PARA TODAS LA PREPARACIONES.docx")
+
+        titulo_protocolo = f"{familia} {franja}"
+
+        texto_pdf=f"""
+{titulo_protocolo}
+
+ANTES DEL ESTUDIO
+{texto_docx("textos/Alertas Generales a todas las preparaciones.docx")}
+
+DIETA 3 DIAS PREVIOS
+{texto_docx("textos/Dieta comun 3 días PREVIOS AL ESTUDIO.docx")}
+
+PREPARACION
+{texto_docx(archivo)}
+
+AYUNO
+{texto_docx("textos/AYUNO PARA TODAS LA PREPARACIONES.docx")}
+
+DESPUES DEL ESTUDIO
+{texto_docx("textos/despues de mi endoscopia.docx")}
+"""
+
+        pdf=generar_pdf(texto_pdf)
+
+        nombre_archivo = f"{familia}_{franja.replace(' ','_')}.pdf"
+
+        with open(pdf,"rb") as f:
+
+            st.download_button(
+                "📄 Descargar preparación completa en PDF",
+                f,
+                file_name=nombre_archivo
+            )
+
+# --------------------------------------------------
+# DESPUES DEL ESTUDIO
+# --------------------------------------------------
+
+elif opcion=="DESPUÉS DE MI ENDOSCOPIA":
+
+    st.header("Indicaciones después del estudio")
+
+    mostrar_post_endoscopia("textos/despues de mi endoscopia.docx")
