@@ -7,10 +7,11 @@ from reportlab.lib.styles import getSampleStyleSheet, ParagraphStyle
 from reportlab.platypus import SimpleDocTemplate, Paragraph, Spacer
 from reportlab.lib.enums import TA_LEFT
 
+# Configuración de página
 st.set_page_config(page_title="Asistente Endoscopía", layout="wide")
 
 # --------------------------------------------------
-# FUNCIONES
+# FUNCIONES DE UTILIDAD
 # --------------------------------------------------
 
 def reiniciar():
@@ -18,188 +19,151 @@ def reiniciar():
     st.rerun()
 
 def obtener_ruta_completa(ruta_relativa):
+    # Obtiene la ruta absoluta respecto al archivo actual
     base_dir = os.path.dirname(os.path.abspath(__file__))
     return os.path.join(base_dir, ruta_relativa)
 
 def texto_docx(ruta):
+    """Extrae texto de un DOCX para usarlo en el PDF."""
     try:
-        doc = Document(obtener_ruta_completa(ruta))
+        path = obtener_ruta_completa(ruta)
+        if not os.path.exists(path):
+            return ""
+        doc = Document(path)
         return "\n".join([p.text.strip() for p in doc.paragraphs if p.text.strip()])
-    except:
+    except Exception:
         return ""
 
 # --------------------------------------------------
-# PDF
+# GENERACIÓN DE PDF
 # --------------------------------------------------
 
 def generar_pdf_profesional(titulo_plan, secciones):
     tmp = tempfile.NamedTemporaryFile(delete=False, suffix=".pdf")
-
     doc = SimpleDocTemplate(tmp.name, pagesize=A4)
     styles = getSampleStyleSheet()
 
-    estilo_titulo = ParagraphStyle('Titulo', parent=styles['Heading1'], fontSize=16)
-    estilo_subtitulo = ParagraphStyle('Subtitulo', parent=styles['Heading2'], fontSize=13)
-    estilo_texto = ParagraphStyle('Texto', parent=styles['Normal'], fontSize=11, alignment=TA_LEFT)
+    estilo_titulo = ParagraphStyle('Titulo', parent=styles['Heading1'], fontSize=16, spaceAfter=12)
+    estilo_subtitulo = ParagraphStyle('Subtitulo', parent=styles['Heading2'], fontSize=13, spaceBefore=10, spaceAfter=5)
+    estilo_texto = ParagraphStyle('Texto', parent=styles['Normal'], fontSize=11, alignment=TA_LEFT, leading=14)
 
     elementos = []
     elementos.append(Paragraph(f"PLAN DE PREPARACIÓN: {titulo_plan}", estilo_titulo))
 
     for nombre, contenido in secciones.items():
         if contenido:
-            elementos.append(Spacer(1, 10))
             elementos.append(Paragraph(nombre, estilo_subtitulo))
-
             for linea in contenido.split("\n"):
                 if linea.strip():
-                    elementos.append(Paragraph(linea, estilo_texto))
+                    # Limpieza básica de caracteres especiales para ReportLab
+                    linea_limpia = linea.replace("•", "-").strip()
+                    elementos.append(Paragraph(linea_limpia, estilo_texto))
+            elementos.append(Spacer(1, 10))
 
     doc.build(elementos)
     return tmp.name
 
-# --------------------------------------------------
-# MOSTRAR DOCX
-# --------------------------------------------------
-
-def mostrar_docx(ruta):
+def mostrar_docx_en_ui(ruta):
+    """Muestra el contenido del DOCX en la interfaz de Streamlit."""
     try:
-        doc = Document(obtener_ruta_completa(ruta))
-        for p in doc.paragraphs:
-            if p.text.strip():
-                st.markdown(f"- {p.text}")
-    except:
-        st.warning(f"No se pudo cargar: {ruta}")
+        path = obtener_ruta_completa(ruta)
+        if os.path.exists(path):
+            doc = Document(path)
+            for p in doc.paragraphs:
+                if p.text.strip():
+                    st.markdown(f"- {p.text}")
+        else:
+            st.warning(f"Archivo no encontrado: {ruta}")
+    except Exception as e:
+        st.error(f"Error al leer el archivo: {e}")
 
 # --------------------------------------------------
-# UI
+# INTERFAZ DE USUARIO (UI)
 # --------------------------------------------------
 
-st.title("Asistente de Preparación Endoscópica")
+st.title("🏥 Asistente de Preparación Endoscópica")
 
-opcion = st.radio(
-    "Elegí una opción:",
+opcion = st.sidebar.radio(
+    "Menú de Navegación:",
     ["ANTES DE MI ENDOSCOPIA", "MI PREPARACIÓN", "DESPUÉS DE MI ENDOSCOPIA"]
 )
 
-if st.button("🔄 Reiniciar"):
+if st.sidebar.button("🔄 Reiniciar Aplicación"):
     reiniciar()
 
 st.divider()
 
-# --------------------------------------------------
-# ANTES (SIN ARCHIVO)
-# --------------------------------------------------
-
+# --- SECCIÓN: ANTES ---
 if opcion == "ANTES DE MI ENDOSCOPIA":
-
     st.header("Alertas Generales")
-
+    st.info("Por favor, lea atentamente estas indicaciones antes de su estudio.")
+    
     st.markdown("""
-1. Si toma medicación que altere la coagulación de la sangre debe recordárselo a su médico con anticipación y consultarlo con su médico hematólogo.  
-2. Debe traer la orden del estudio vigente y debidamente autorizada si corresponde.  
-3. Debe concurrir acompañado.  
+    1. **Medicación:** Si toma anticoagulantes o antiagregantes, consulte con hematología.
+    2. **Documentación:** Traer orden vigente y autorizada.
+    3. **Acompañante:** Es obligatorio concurrir acompañado por un adulto.
+    
+    **REQUISITOS CRÍTICOS:**
+    * **Ayuno:** 8 hs de sólidos y lácteos. Líquidos claros (agua/Gatorade) hasta 4 hs antes.
+    * **Estética:** Sin uñas pintadas, sin anillos ni piercings.
+    
+    **INFORMACIÓN MÉDICA:**
+    * La preparación causa diarrea intensa (realizar en domicilio).
+    * Riesgo de perforación diagnóstica: ~1 cada 2000 estudios.
+    """)
 
-**PODRÁ REALIZAR EL ESTUDIO SI CUMPLE CON LOS ÍTEMS ANTERIORES**
-
-• 8 hs antes del estudio suspender todo alimento sólido y lácteo. Puede continuar con agua y/o Gatorade (manzana o limón) hasta 4 hs antes.  
-• NO debe concurrir con las uñas pintadas o esmaltadas.  
-• DEBE quitarse anillos, aros y/o piercings.  
-
-**TENER EN CUENTA:**
-
-- Esta preparación produce diarrea intensa → realizarla en domicilio.  
-- Durante el estudio pueden extraerse pólipos o biopsias.  
-- Riesgo de perforación:
-    - Terapéutica: 0.15% – 2.14%  
-    - Diagnóstica: ~1 cada 2000 estudios  
-""")
-
-# --------------------------------------------------
-# PREPARACIÓN
-# --------------------------------------------------
-
+# --- SECCIÓN: PREPARACIÓN ---
 elif opcion == "MI PREPARACIÓN":
+    col1, col2 = st.columns(2)
+    
+    with col1:
+        familia = st.selectbox(
+            "Tipo de preparación prescrita:",
+            ["FOSFATOS", "PICOSULFATO", "POLIETILENGLICOL", "BAREX KIT"]
+        )
+    
+    with col2:
+        franja = st.radio(
+            "Horario de su turno:",
+            ["7 A 12", "12 A 16", "16 A 19"]
+        )
 
-    familia = st.selectbox(
-        "Tipo de preparación",
-        ["FOSFATOS", "PICOSULFATO", "POLIETILENGLICOL", "BAREX KIT"]
-    )
-
-    franja = st.radio(
-        "Horario del estudio",
-        ["7 A 12", "12 A 16", "16 A 19"]
-    )
-
-    # Definir archivo
+    # Lógica de archivos
     if familia == "BAREX KIT":
-        archivo_prep = f"textos/BAREX KIT DE {'7 A 12' if franja=='7 A 12' else '12 A 19'}.docx"
+        # Ajuste de lógica para Barex Kit según tu código original
+        horario_file = "7 A 12" if franja == "7 A 12" else "12 A 19"
+        archivo_prep = f"textos/BAREX KIT DE {horario_file}.docx"
     elif familia == "POLIETILENGLICOL":
         archivo_prep = f"textos/POLIETILENGLICOL 4 litros de {franja}HS.docx"
     else:
         archivo_prep = f"textos/{familia} DE {franja}.docx"
 
+    st.subheader(f"Instrucciones para {familia}")
+    mostrar_docx_en_ui(archivo_prep)
+
+    # --- GENERACIÓN DE PDF ---
     st.divider()
+    if st.button("🛠️ Preparar documento para descarga"):
+        texto_preparacion = texto_docx(archivo_prep)
+        texto_post = texto_docx("textos/despues de mi endoscopia.docx")
+        
+        datos_pdf = {
+            "INDICACIONES PREVIAS": "8hs Ayuno sólidos. 4hs Ayuno líquidos claros. Concurrir acompañado.",
+            f"INSTRUCCIONES DE {familia}": texto_preparacion,
+            "CUIDADOS POST-ESTUDIO": texto_post
+        }
 
-    st.subheader("Preparación")
-    mostrar_docx(archivo_prep)
+        ruta_pdf = generar_pdf_profesional(f"{familia} ({franja}hs)", datos_pdf)
+        
+        with open(ruta_pdf, "rb") as f:
+            st.download_button(
+                label="📥 Descargar Plan en PDF",
+                data=f.read(),
+                file_name=f"Plan_Preparacion_{familia.replace(' ','_')}.pdf",
+                mime="application/pdf"
+            )
 
-datos_pdf = {
-    "Antes del Estudio": """
-Si toma medicación que altere la coagulación consulte con su médico.
-Debe traer orden vigente.
-Debe concurrir acompañado.
-
-8 hs antes: sin sólidos ni lácteos.
-Puede tomar agua o Gatorade hasta 4 hs antes.
-
-No uñas pintadas.
-Retirar anillos y piercings.
-
-Produce diarrea intensa.
-Puede haber biopsias o polipectomía.
-Riesgo bajo de perforación.
-""",
-    "Después del Estudio": texto_docx("textos/despues de mi endoscopia.docx")
-}
-    st.divider()
-
-    # PDF directo (UN SOLO BOTÓN)
-    nombre_plan = f"{familia} {franja}"
-
-    datos_pdf = {
-        "Antes del Estudio": """
-Si toma medicación que altere la coagulación consulte con su médico.
-Debe traer orden vigente.
-Debe concurrir acompañado.
-
-8 hs antes: sin sólidos ni lácteos.
-Puede tomar agua o Gatorade hasta 4 hs antes.
-
-No uñas pintadas.
-Retirar anillos y piercings.
-
-Produce diarrea intensa.
-Puede haber biopsias o polipectomía.
-Riesgo bajo de perforación.
-""",
-        "Después del Estudio": texto_docx("textos/despues de mi endoscopia.docx")
-    }
-
-    ruta_pdf = generar_pdf_profesional(nombre_plan, datos_pdf)
-
-    with open(ruta_pdf, "rb") as f:
-        st.download_button(
-            label="📄 Descargar PDF",
-            data=f.read(),
-            file_name=f"Plan_{familia}_{franja.replace(' ','_')}.pdf",
-            mime="application/pdf"
-        )
-
-# --------------------------------------------------
-# DESPUÉS
-# --------------------------------------------------
-
+# --- SECCIÓN: DESPUÉS ---
 elif opcion == "DESPUÉS DE MI ENDOSCOPIA":
-
-    st.header("Indicaciones después del estudio")
-    mostrar_docx("textos/despues de mi endoscopia.docx")
+    st.header("Indicaciones Post-Estudio")
+    mostrar_docx_en_ui("textos/despues de mi endoscopia.docx")
