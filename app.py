@@ -143,9 +143,24 @@ elif opcion == "MI PREPARACIÓN":
     st.subheader("Preparación")
     mostrar_docx(archivo_prep)
 
-    st.subheader("Después del estudio")
-    mostrar_docx("textos/despues de mi endoscopia.docx")
+datos_pdf = {
+    "Antes del Estudio": """
+Si toma medicación que altere la coagulación consulte con su médico.
+Debe traer orden vigente.
+Debe concurrir acompañado.
 
+8 hs antes: sin sólidos ni lácteos.
+Puede tomar agua o Gatorade hasta 4 hs antes.
+
+No uñas pintadas.
+Retirar anillos y piercings.
+
+Produce diarrea intensa.
+Puede haber biopsias o polipectomía.
+Riesgo bajo de perforación.
+""",
+    "Después del Estudio": texto_docx("textos/despues de mi endoscopia.docx")
+}
     st.divider()
 
     # PDF directo (UN SOLO BOTÓN)
