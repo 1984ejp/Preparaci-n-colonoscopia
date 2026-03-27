@@ -447,18 +447,14 @@ elif opcion=="MI PREPARACIÓN":
     )
 
     st.markdown("### Antecedentes médicos")
-
     sin=st.checkbox("Sin antecedentes")
-
     renal=st.checkbox("Insuficiencia renal",disabled=sin)
     cardiaca=st.checkbox("Insuficiencia cardíaca",disabled=sin)
     diabetes=st.checkbox("Diabetes",disabled=sin)
     hipertension=st.checkbox("Hipertensión arterial",disabled=sin)
 
     st.markdown("### Medicación actual")
-
     sin_medicacion=st.checkbox("Sin medicación")
-
     aspirina=st.checkbox("Aspirina",disabled=sin_medicacion)
     clopidogrel=st.checkbox("Clopidogrel",disabled=sin_medicacion)
     sintrom=st.checkbox("Sintrom",disabled=sin_medicacion)
@@ -466,9 +462,28 @@ elif opcion=="MI PREPARACIÓN":
     metformina=st.checkbox("Metformina",disabled=sin_medicacion)
 
     if st.button("GENERAR PLAN"):
-        # ... (tus mostrar_docx y lógica de 'archivo' aquí) ...
+        # 1. Definir el archivo según la lógica de selección
+        archivo = ""
+        if familia=="BAREX KIT":
+            archivo = "textos/BAREX KIT DE 7 A 12.docx" if franja=="7 A 12" else "textos/BAREX KIT DE 12 A 19.docx"
+        elif familia=="FOSFATOS":
+            archivo = f"textos/FOSFATOS DE {franja}.docx"
+        elif familia=="PICOSULFATO":
+            archivo = f"textos/PICOSULFATO DE {franja}.docx"
+        elif familia=="POLIETINELGLICOL":
+            archivo = f"textos/POLIETINELGLICOL 4 litros de {franja}HS.docx"
 
-        # 1. Recolectamos todo el texto de los .docx
+        # 2. Mostrar visualmente en la app
+        st.header("Dieta 3 días previos")
+        mostrar_docx("textos/Dieta comun 3 días PREVIOS AL ESTUDIO.docx")
+        
+        st.header("Preparación indicada")
+        mostrar_docx(archivo)
+        
+        st.header("Ayuno")
+        mostrar_docx("textos/AYUNO PARA TODAS LA PREPARACIONES.docx")
+
+        # 3. Preparar datos para el PDF
         secciones_para_pdf = {
             "Alertas Importantes": texto_docx("textos/Alertas Generales a todas las preparaciones.docx"),
             "Dieta Previa": texto_docx("textos/Dieta comun 3 días PREVIOS AL ESTUDIO.docx"),
@@ -477,47 +492,24 @@ elif opcion=="MI PREPARACIÓN":
             "Cuidados Post-Estudio": texto_docx("textos/despues de mi endoscopia.docx")
         }
 
-        # 2. Generamos el archivo físico
-        ruta_archivo_pdf = generar_pdf_profesional(f"{familia} - {franja}HS", secciones_para_pdf)
-
-        # 3. Ofrecemos la descarga
-        with open(ruta_archivo_pdf, "rb") as f:
-            pdf_data = f.read()
+        # 4. Generar y ofrecer descarga
+        try:
+            ruta_archivo_pdf = generar_pdf_profesional(f"{familia} - {franja}HS", secciones_para_pdf)
+            with open(ruta_archivo_pdf, "rb") as f:
+                pdf_data = f.read()
             
-        st.download_button(
-            label="📩 DESCARGAR MI PLAN EN PDF",
-            data=pdf_data,
-            file_name=f"Plan_Endoscopia_{familia}.pdf",
-            mime="application/pdf"
-        )
-
-ANTES DEL ESTUDIO
-{texto_docx("textos/Alertas Generales a todas las preparaciones.docx")}
-
-DIETA 3 DIAS PREVIOS
-{texto_docx("textos/Dieta comun 3 días PREVIOS AL ESTUDIO.docx")}
-
-PREPARACION
-{texto_docx(archivo)}
-
-AYUNO
-{texto_docx("textos/AYUNO PARA TODAS LA PREPARACIONES.docx")}
-
-DESPUES DEL ESTUDIO
-{texto_docx("textos/despues de mi endoscopia.docx")}
-"""
-
-        pdf=generar_pdf(texto_pdf)
-
-        nombre_archivo = f"{familia}_{franja.replace(' ','_')}.pdf"
-
-        with open(pdf,"rb") as f:
-
             st.download_button(
-                "📄 Descargar preparación completa en PDF",
-                f,
-                file_name=nombre_archivo
+                label="📩 DESCARGAR MI PLAN EN PDF",
+                data=pdf_data,
+                file_name=f"Plan_Endoscopia_{familia}_{franja.replace(' ','')}.pdf",
+                mime="application/pdf"
             )
+        except Exception as e:
+            st.error(f"Error al generar el PDF: {e}")
+
+# --------------------------------------------------
+# DESPUES DEL ESTUDIO
+# --------------------------------------------------
 
 # --------------------------------------------------
 # DESPUES DEL ESTUDIO
