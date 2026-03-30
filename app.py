@@ -90,7 +90,7 @@ def generar_pdf_profesional(titulo_plan, secciones):
     doc.build(elementos)
     return tmp.name
 
-# 4. ESTILOS CSS (REFINADOS)
+# 4. ESTILOS CSS
 st.markdown("""
 <style>
 .stApp { background: linear-gradient(180deg,#e9f0f7,#dfe8f3); }
@@ -101,8 +101,8 @@ st.markdown("""
     box-shadow: 0px 8px 24px rgba(0,0,0,0.08); 
     margin-bottom: 20px;
 }
-/* Forzamos color oscuro en textos clave */
-.card h1, .card h3, .card p, .card span, .card i {
+/* Forzamos color oscuro en textos */
+.card h1, .card h3, .card p, .card span {
     color: #1a5c96 !important;
 }
 .stButton button { 
@@ -112,7 +112,6 @@ st.markdown("""
     font-size: 20px; 
     width: 100%; 
 }
-/* Asegura que los textos fuera de la card también se vean */
 h1, h2, h3, p, span, label {
     color: #1a5c96 !important;
 }
@@ -132,10 +131,13 @@ with col1:
     st.markdown('<div class="card">', unsafe_allow_html=True)
     st.markdown("# Hola, soy Francisco 👋")
     st.markdown("### Voy a ayudarte paso a paso con tu estudio.")
+    
+    # REEMPLAZO DE TEXTO SOLICITADO
     st.markdown(f"""
     <div style="background-color:#f0f7ff; padding:15px; border-radius:12px; border-left:5px solid #4da6ff; margin-top:10px;">
-        <span style="color:#1a5c96 !important; font-style: italic; font-size:16px;">
-        "La Endoscopía representa hoy, la mejor técnica para el diagnóstico y prevención del Cáncer de Colon."
+        <span style="color:#1a5c96 !important; font-size:15px; line-height:1.4; display:block;">
+        La Endoscopía representa hoy día, la mejor técnica de la que actualmente dispone el médico para el diagnóstico y seguimiento de las enfermedades del Intestino Grueso, para la prevención del Cáncer de Colon y para el tratamiento de un variado número de lesiones. Durante el estudio se pueden extraer pólipos y tomar biopsias. <br><br>
+        Entre los riesgos potenciales que presenta, está la perforación microscópica y/o completa del Intestino Grueso. La incidencia de perforación por Colonoscopía es más común después de una terapéutica; oscila del 0.15 y el 2.14% según las series publicadas. Para una Colonoscopía Diagnóstica, la presencia de complicaciones es de aproximadamente 1 por cada 2000 exploraciones.
         </span>
     </div>
     """, unsafe_allow_html=True)
