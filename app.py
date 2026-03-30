@@ -24,34 +24,6 @@ TEXTO_ANTES = """
 ⚠️ Es importante que sepa que durante el estudio se pueden extraer pólipos y tomar biopsias. Entre los riesgos potenciales del método está la perforación microscópica o completa del intestino grueso. La incidencia de perforación por colonoscopía oscila entre 0.15% y 2.14%. Para una colonoscopía diagnóstica la presencia de complicaciones es aproximadamente 1 cada 2000 exploraciones.
 """
 
-TEXTO_POST = """
-Usted acaba de realizar una endoscopia digestiva con sedación/anestesia. Es importante seguir estas recomendaciones para su seguridad y recuperación. 
-
-1. OBSERVACIONES INICIALES 
-• Permanecer bajo vigilancia en la sala de recuperación hasta que recupere estado de alerta y estabilidad vital. 
-• Evite realizar actividades que requieran coordinación hasta pasadas al menos 12 horas post-procedimiento. 
-• Evite conducir, manejar maquinaria o firmar documentos importantes durante las primeras 12 horas.
-
-2. CUIDADOS EN EL DOMICILIO 
-• Descansar y evitar esfuerzos físicos importantes. 
-• Mantener dieta ligera las primeras horas, según indicación del médico. 
-• Evitar consumo de alcohol y medicamentos sedantes sin indicación. 
-
-3. SIGNOS DE ALARMA – ACUDIR DE INMEDIATO 
-Consulte urgentemente si presenta: 
-• Dolor abdominal intenso o repentino. 
-• Fiebre ≥ 38°C. 
-• Sangrado abundante, vómitos persistentes o dificultad respiratoria.
-
-4. CONTACTO DE URGENCIA 
-• Gastroenterología CEMIC (08:00 a 20:00 hs): 11 5596 2440. 
-• Fuera de horario: Guardia CEMIC Saavedra (Galván 4102) o CEMIC Pombo (Av. Cnel. Díaz 2423).
-
-5. TOMA DE MUESTRAS - ANATOMÍA PATOLÓGICA 
-• El resultado será enviado automáticamente a su mail registrado. 
-• De no recibirlo en 21 días, pídalo a: informespatologia@cemic.edu.ar
-"""
-
 # 3. FUNCIONES DE APOYO
 def reiniciar():
     st.session_state.clear()
@@ -101,10 +73,6 @@ st.markdown("""
     box-shadow: 0px 8px 24px rgba(0,0,0,0.08); 
     margin-bottom: 20px;
 }
-/* Forzamos color oscuro en textos */
-.card h1, .card h3, .card p, .card span {
-    color: #1a5c96 !important;
-}
 .stButton button { 
     background-color: #4da6ff !important; 
     color: white !important; 
@@ -115,6 +83,22 @@ st.markdown("""
 h1, h2, h3, p, span, label {
     color: #1a5c96 !important;
 }
+
+/* BURBUJAS CONFIGURABLES */
+.burbuja {
+    padding: 18px; 
+    border-radius: 15px; 
+    margin-bottom: 12px;
+    font-size: 16px; 
+    line-height: 1.5; 
+    display: block;
+    box-shadow: 0px 2px 8px rgba(0,0,0,0.05);
+}
+.burbuja-azul { background-color: #f0f7ff !important; border-left: 6px solid #4da6ff; color: #1a5c96 !important; }
+.burbuja-verde { background-color: #eafaf1 !important; border-left: 6px solid #2ecc71; color: #1a5c96 !important; }
+.burbuja-amarilla { background-color: #fef9e7 !important; border-left: 6px solid #f1c40f; color: #1a5c96 !important; }
+.burbuja-roja { background-color: #fdedec !important; border-left: 6px solid #e74c3c; color: #1a5c96 !important; }
+.burbuja-gris { background-color: #f4f6f7 !important; border-left: 6px solid #95a5a6; color: #1a5c96 !important; }
 </style>
 """, unsafe_allow_html=True)
 
@@ -124,7 +108,7 @@ def get_img64(path):
     with open(path, "rb") as f: return base64.b64encode(f.read()).decode()
 img = get_img64("francisco.png")
 
-# 6. LAYOUT
+# 6. LAYOUT PRINCIPAL
 col1, col2 = st.columns([1.1, 1])
 
 with col1:
@@ -132,13 +116,15 @@ with col1:
     st.markdown("# Hola, soy Francisco 👋")
     st.markdown("### Voy a ayudarte paso a paso con tu estudio.")
     
-    # REEMPLAZO DE TEXTO SOLICITADO
     st.markdown(f"""
-    <div style="background-color:#f0f7ff; padding:15px; border-radius:12px; border-left:5px solid #4da6ff; margin-top:10px;">
-        <span style="color:#1a5c96 !important; font-size:15px; line-height:1.4; display:block;">
-        La Endoscopía representa hoy día, la mejor técnica de la que actualmente dispone el médico para el diagnóstico y seguimiento de las enfermedades del Intestino Grueso, para la prevención del Cáncer de Colon y para el tratamiento de un variado número de lesiones. Durante el estudio se pueden extraer pólipos y tomar biopsias. <br><br>
-        Entre los riesgos potenciales que presenta, está la perforación microscópica y/o completa del Intestino Grueso. La incidencia de perforación por Colonoscopía es más común después de una terapéutica; oscila del 0.15 y el 2.14% según las series publicadas. Para una Colonoscopía Diagnóstica, la presencia de complicaciones es de aproximadamente 1 por cada 2000 exploraciones.
-        </span>
+    <div class="burbuja burbuja-azul">
+        La Endoscopía representa hoy día, la mejor técnica para el diagnóstico y seguimiento de las enfermedades del Intestino Grueso, para la prevención del Cáncer de Colon y para el tratamiento de un variado número de lesiones.
+    </div>
+    <div class="burbuja burbuja-verde">
+        Durante el estudio se pueden extraer pólipos y tomar biopsias.
+    </div>
+    <div class="burbuja burbuja-amarilla">
+        Entre los riesgos potenciales, está la perforación microscópica y/o completa del Intestino Grueso. La incidencia de perforación por Colonoscopía es más común después de una terapéutica; oscila del 0.15 y el 2.14% según las series publicadas. Y para una Colonoscopía Diagnóstica, la presencia de complicaciones es de aproximadamente 1 por cada 2000 exploraciones.
     </div>
     """, unsafe_allow_html=True)
     
@@ -183,7 +169,9 @@ elif opcion == "MI PREPARACIÓN":
         st.success("Plan generado.")
         mostrar_docx(archivo)
         
-        secciones = {"Indicaciones": TEXTO_ANTES, "Tu Plan": texto_docx(archivo), "Post-Estudio": TEXTO_POST}
+        # Guardamos los textos para el PDF (aquí usamos el texto plano para el documento)
+        TEXTO_POST_PLANO = "1. OBSERVACIONES INICIALES: ... [Texto Completo]" 
+        secciones = {"Indicaciones": TEXTO_ANTES, "Tu Plan": texto_docx(archivo), "Post-Estudio": "Recomendaciones post-procedimiento enviadas en el asistente."}
         try:
             path_pdf = generar_pdf_profesional(st.session_state['plan_titulo'], secciones)
             with open(path_pdf, "rb") as f:
@@ -193,8 +181,37 @@ elif opcion == "MI PREPARACIÓN":
 
 elif opcion == "DESPUÉS DE MI ENDOSCOPIA":
     st.markdown("## 🏁 Recomendaciones Post-Estudio")
-    st.markdown(f"""
-    <div style="background-color:white; padding:25px; border-radius:15px; border-left:10px solid #2ecc71; color:#333333 !important; font-size:18px; line-height:1.6; box-shadow: 0px 4px 12px rgba(0,0,0,0.05);">
-        {TEXTO_POST.replace(chr(10), "<br>")}
+    st.info("Usted acaba de realizar una endoscopia digestiva con sedación/anestesia. Siga estas recomendaciones:")
+    
+    # IMPLEMENTACIÓN DE BURBUJAS PARA POST-ESTUDIO
+    st.markdown("""
+    <div class="burbuja burbuja-azul">
+        <b>1. OBSERVACIONES INICIALES</b><br>
+        • Permanecer bajo vigilancia en la sala de recuperación hasta recuperar estado de alerta.<br>
+        • Evite actividades que requieran coordinación por 12 horas.<br>
+        • No conducir, manejar maquinaria ni firmar documentos importantes.
+    </div>
+    <div class="burbuja burbuja-gris">
+        <b>2. CUIDADOS EN EL DOMICILIO</b><br>
+        • Descansar y evitar esfuerzos físicos importantes.<br>
+        • Mantener dieta ligera las primeras horas, según indicación médica.<br>
+        • Evitar consumo de alcohol y medicamentos sedantes sin indicación.
+    </div>
+    <div class="burbuja burbuja-roja">
+        <b>3. SIGNOS DE ALARMA – ACUDIR DE INMEDIATO</b><br>
+        Consulte urgentemente si presenta:<br>
+        • Dolor abdominal intenso o repentino.<br>
+        • Fiebre ≥ 38°C.<br>
+        • Sangrado abundante, vómitos persistentes o dificultad respiratoria.
+    </div>
+    <div class="burbuja burbuja-verde">
+        <b>4. CONTACTO DE URGENCIA</b><br>
+        • Gastroenterología CEMIC (08:00 a 20:00 hs): 11 5596 2440.<br>
+        • Fuera de horario: Guardia CEMIC Saavedra o CEMIC Pombo.
+    </div>
+    <div class="burbuja burbuja-amarilla">
+        <b>5. TOMA DE MUESTRAS - ANATOMÍA PATOLÓGICA</b><br>
+        • El resultado será enviado automáticamente a su mail registrado.<br>
+        • De no recibirlo en 21 días, pídalo a: informespatologia@cemic.edu.ar
     </div>
     """, unsafe_allow_html=True)
