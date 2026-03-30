@@ -66,13 +66,21 @@ def generar_pdf_profesional(titulo_plan, secciones):
 st.markdown("""
 <style>
 .stApp { background: linear-gradient(180deg,#e9f0f7,#dfe8f3); }
+
+/* Ajuste de la tarjeta para que contenga todo sin espacios extra arriba */
 .card { 
     background-color: white !important; 
     padding: 28px; 
     border-radius: 22px; 
     box-shadow: 0px 8px 24px rgba(0,0,0,0.08); 
-    margin-bottom: 20px;
+    margin-top: 0px; 
 }
+
+/* Colores de texto forzados */
+h1, h2, h3, p, span, label {
+    color: #1a5c96 !important;
+}
+
 .stButton button { 
     background-color: #4da6ff !important; 
     color: white !important; 
@@ -80,11 +88,8 @@ st.markdown("""
     font-size: 20px; 
     width: 100%; 
 }
-h1, h2, h3, p, span, label {
-    color: #1a5c96 !important;
-}
 
-/* BURBUJAS CONFIGURABLES */
+/* Burbujas de información */
 .burbuja {
     padding: 18px; 
     border-radius: 15px; 
@@ -112,6 +117,7 @@ img = get_img64("francisco.png")
 col1, col2 = st.columns([1.1, 1])
 
 with col1:
+    # Todo el saludo y burbujas ahora están DENTRO de la etiqueta .card
     st.markdown('<div class="card">', unsafe_allow_html=True)
     st.markdown("# Hola, soy Francisco 👋")
     st.markdown("### Voy a ayudarte paso a paso con tu estudio.")
@@ -135,7 +141,8 @@ with col1:
 
 with col2:
     if img:
-        st.markdown(f'<div style="display:flex;justify-content:center;margin-top:20px;"><img src="data:image/png;base64,{img}" style="width:100%;max-width:400px;border-radius:24px;"></div>', unsafe_allow_html=True)
+        # Ajuste de margen para alinear la imagen con la burbuja blanca de la izquierda
+        st.markdown(f'<div style="display:flex;justify-content:center;margin-top:0px;"><img src="data:image/png;base64,{img}" style="width:100%;max-width:400px;border-radius:24px;"></div>', unsafe_allow_html=True)
 
 # 7. LÓGICA DE CONTENIDO
 if opcion == "ANTES DE MI ENDOSCOPIA":
@@ -169,49 +176,42 @@ elif opcion == "MI PREPARACIÓN":
         st.success("Plan generado.")
         mostrar_docx(archivo)
         
-        # Guardamos los textos para el PDF (aquí usamos el texto plano para el documento)
-        TEXTO_POST_PLANO = "1. OBSERVACIONES INICIALES: ... [Texto Completo]" 
-        secciones = {"Indicaciones": TEXTO_ANTES, "Tu Plan": texto_docx(archivo), "Post-Estudio": "Recomendaciones post-procedimiento enviadas en el asistente."}
+        secciones = {"Indicaciones": TEXTO_ANTES, "Tu Plan": texto_docx(archivo)}
         try:
             path_pdf = generar_pdf_profesional(st.session_state['plan_titulo'], secciones)
             with open(path_pdf, "rb") as f:
                 st.download_button("📩 DESCARGAR PLAN PDF", f.read(), file_name=f"Plan_{st.session_state['plan_titulo']}.pdf", mime="application/pdf")
         except: 
-            st.error("Error al crear PDF. Verifica los archivos en la carpeta 'textos'.")
+            st.error("Error al crear PDF.")
 
 elif opcion == "DESPUÉS DE MI ENDOSCOPIA":
     st.markdown("## 🏁 Recomendaciones Post-Estudio")
-    st.info("Usted acaba de realizar una endoscopia digestiva con sedación/anestesia. Siga estas recomendaciones:")
+    st.info("Siga estas recomendaciones para su seguridad:")
     
-    # IMPLEMENTACIÓN DE BURBUJAS PARA POST-ESTUDIO
     st.markdown("""
     <div class="burbuja burbuja-azul">
         <b>1. OBSERVACIONES INICIALES</b><br>
-        • Permanecer bajo vigilancia en la sala de recuperación hasta recuperar estado de alerta.<br>
+        • Permanecer bajo vigilancia en la sala de recuperación.<br>
         • Evite actividades que requieran coordinación por 12 horas.<br>
-        • No conducir, manejar maquinaria ni firmar documentos importantes.
+        • No conducir ni firmar documentos importantes.
     </div>
     <div class="burbuja burbuja-gris">
         <b>2. CUIDADOS EN EL DOMICILIO</b><br>
-        • Descansar y evitar esfuerzos físicos importantes.<br>
-        • Mantener dieta ligera las primeras horas, según indicación médica.<br>
-        • Evitar consumo de alcohol y medicamentos sedantes sin indicación.
+        • Descansar y evitar esfuerzos físicos.<br>
+        • Mantener dieta ligera las primeras horas.<br>
+        • Evitar alcohol y sedantes.
     </div>
     <div class="burbuja burbuja-roja">
-        <b>3. SIGNOS DE ALARMA – ACUDIR DE INMEDIATO</b><br>
-        Consulte urgentemente si presenta:<br>
-        • Dolor abdominal intenso o repentino.<br>
-        • Fiebre ≥ 38°C.<br>
-        • Sangrado abundante, vómitos persistentes o dificultad respiratoria.
+        <b>3. SIGNOS DE ALARMA</b><br>
+        Consulte urgentemente si presenta dolor abdominal intenso, fiebre o sangrado.
     </div>
     <div class="burbuja burbuja-verde">
         <b>4. CONTACTO DE URGENCIA</b><br>
-        • Gastroenterología CEMIC (08:00 a 20:00 hs): 11 5596 2440.<br>
-        • Fuera de horario: Guardia CEMIC Saavedra o CEMIC Pombo.
+        • Gastroenterología CEMIC: 11 5596 2440.<br>
+        • Guardias: Galván 4102 o Av. Cnel. Díaz 2423.
     </div>
     <div class="burbuja burbuja-amarilla">
-        <b>5. TOMA DE MUESTRAS - ANATOMÍA PATOLÓGICA</b><br>
-        • El resultado será enviado automáticamente a su mail registrado.<br>
-        • De no recibirlo en 21 días, pídalo a: informespatologia@cemic.edu.ar
+        <b>5. ANATOMÍA PATOLÓGICA</b><br>
+        • Resultado por mail. Si no llega en 21 días: informespatologia@cemic.edu.ar
     </div>
     """, unsafe_allow_html=True)
