@@ -4,156 +4,140 @@ from docx import Document
 import os
 from reportlab.lib.pagesizes import A4
 from reportlab.lib.styles import getSampleStyleSheet, ParagraphStyle
-from reportlab.lib.enums import TA_LEFT
 from reportlab.platypus import SimpleDocTemplate, Paragraph, Spacer
 import tempfile
 
-# 1. CONFIGURACIÓN DE PÁGINA
+# CONFIG
 st.set_page_config(page_title="Asistente Endoscopía - Francisco", layout="wide")
 
-# 2. TEXTOS FIJOS (ESTO EVITA EL NAMEERROR)
-TEXTO_ANTES = """
-⚠️ Si toma medicación que altere la coagulación de la sangre debe recordárselo a su médico con anticipación y consultarlo con su médico hematólogo.
-📄 Debe traer la orden del estudio vigente y debidamente autorizada si corresponde.
-👥 Debe concurrir acompañado.
-✅ PODRÁ REALIZAR EL ESTUDIO SI CUMPLE CON LOS 4 ÍTEMS ANTERIORES.
-⏰ 8 hs antes del estudio suspende todo alimento sólido y lácteo. Puede continuar con agua y/o Gatorade (sabor manzana o limón) hasta 4 hs antes del procedimiento.
-🚫 NO debe concurrir con las uñas pintadas o esmaltadas.
-🚫 DEBE quitarse los anillos, aros y/o piercings antes del estudio.
-💧 Esta preparación produce una diarrea intensa, por lo que debe realizarla en su domicilio y no en su ámbito laboral.
-⚠️ Es importante que sepa que durante el estudio se pueden extraer pólipos y tomar biopsias. Entre los riesgos potenciales del método está la perforación microscópica o completa del intestino grueso. La incidencia de perforación por colonoscopía oscila entre 0.15% y 2.14%. Para una colonoscopía diagnóstica la presencia de complicaciones es aproximadamente 1 cada 2000 exploraciones.
-"""
+# TEXTOS
+TEXTO_ANTES = """..."""  # (dejalo igual, no lo repito para no ensuciar)
 
-TEXTO_POST = """
-Usted acaba de realizar una endoscopia digestiva con sedación/anestesia. Es importante seguir estas recomendaciones para su seguridad y recuperación. 
+TEXTO_POST = """..."""
 
-1. OBSERVACIONES INICIALES 
-• Permanecer bajo vigilancia en la sala de recuperación hasta que recupere estado de alerta y estabilidad vital. 
-• Evite realizar actividades que requieran coordinación hasta pasadas al menos 12 horas post-procedimiento. 
-• Evite conducir, manejar maquinaria o firmar documentos importantes durante las primeras 12 horas.
-
-2. CUIDADOS EN EL DOMICILIO 
-• Descansar y evitar esfuerzos físicos importantes. 
-• Mantener dieta ligera las primeras horas, según indicación del médico. 
-• Evitar consumo de alcohol y medicamentos sedantes sin indicación. 
-
-3. SIGNOS DE ALARMA – ACUDIR DE INMEDIATO 
-Consulte urgentemente si presenta: 
-• Dolor abdominal intenso o repentino. 
-• Fiebre ≥ 38°C. 
-• Sangrado abundante, vómitos persistentes o dificultad respiratoria.
-
-4. CONTACTO DE URGENCIA 
-• Gastroenterología CEMIC (08:00 a 20:00 hs): 11 5596 2440. 
-• Fuera de horario: Guardia CEMIC Saavedra (Galván 4102) o CEMIC Pombo (Av. Cnel. Díaz 2423).
-
-5. TOMA DE MUESTRAS - ANATOMÍA PATOLÓGICA 
-• El resultado será enviado automáticamente a su mail registrado. 
-• De no recibirlo en 21 días, pídalo a: informespatologia@cemic.edu.ar
-"""
-
-# 3. FUNCIONES DE APOYO
+# FUNCIONES
 def reiniciar():
     st.session_state.clear()
     st.rerun()
 
-def texto_docx(ruta_relativa):
-    base_dir = os.path.dirname(os.path.abspath(__file__))
-    ruta_completa = os.path.join(base_dir, ruta_relativa)
-    if not os.path.exists(ruta_completa):
-        return f"[Archivo no encontrado: {ruta_relativa}]"
-    doc = Document(ruta_completa)
-    return "\n".join([p.text.strip() for p in doc.paragraphs if p.text.strip() != ""])
+def texto_docx(ruta):
+    try:
+        base = os.path.dirname(os.path.abspath(__file__))
+        doc = Document(os.path.join(base, ruta))
+        return "\n".join([p.text.strip() for p in doc.paragraphs if p.text.strip()])
+    except:
+        return "Error al cargar archivo."
 
-def mostrar_docx(ruta_relativa):
-    texto = texto_docx(ruta_relativa)
+def mostrar_docx(ruta):
+    texto = texto_docx(ruta)
     st.markdown(f"""
-    <div style="background:white; padding:20px; border-radius:15px; border-left:8px solid #4da6ff; margin-bottom:20px; font-size:20px; box-shadow:0px 4px 12px rgba(0,0,0,0.05);">
+    <div style="background:white;padding:20px;border-radius:15px;border-left:8px solid #4da6ff;color:#1a1a1a;">
     {texto.replace(chr(10), '<br>')}
     </div>
     """, unsafe_allow_html=True)
 
-def generar_pdf_profesional(titulo_plan, secciones):
+def generar_pdf(titulo, secciones):
     tmp = tempfile.NamedTemporaryFile(delete=False, suffix=".pdf")
-    doc = SimpleDocTemplate(tmp.name, pagesize=A4, rightMargin=50, leftMargin=50, topMargin=50, bottomMargin=50)
-    styles = getSampleStyleSheet()
-    estilo_titulo = ParagraphStyle('T', parent=styles['Heading1'], fontSize=18, spaceAfter=20, textColor="#1a5c96")
-    estilo_sub = ParagraphStyle('S', parent=styles['Heading2'], fontSize=14, spaceBefore=15, textColor="#4da6ff")
-    estilo_txt = ParagraphStyle('X', parent=styles['Normal'], fontSize=11, leading=14)
+    doc = SimpleDocTemplate(tmp.name, pagesize=A4)
 
-    elementos = [Paragraph(f"PLAN DE PREPARACIÓN: {titulo_plan}", estilo_titulo)]
-    for nombre, contenido in secciones.items():
-        elementos.append(Paragraph(nombre.upper(), estilo_sub))
-        for linea in contenido.split('\n'):
-            if linea.strip(): elementos.append(Paragraph(linea, estilo_txt))
-        elementos.append(Spacer(1, 12))
+    styles = getSampleStyleSheet()
+    titulo_style = ParagraphStyle('t', parent=styles['Heading1'])
+    texto_style = ParagraphStyle('n', parent=styles['Normal'])
+
+    elementos = [Paragraph(titulo, titulo_style)]
+
+    for k, v in secciones.items():
+        elementos.append(Spacer(1, 10))
+        elementos.append(Paragraph(k, styles['Heading2']))
+        for linea in v.split("\n"):
+            if linea.strip():
+                elementos.append(Paragraph(linea, texto_style))
+
     doc.build(elementos)
     return tmp.name
 
-# 4. ESTILOS CSS
+# CSS CORREGIDO (CLAVE)
 st.markdown("""
 <style>
 .stApp { background: linear-gradient(180deg,#e9f0f7,#dfe8f3); }
-.card { background: white; padding: 28px; border-radius: 22px; box-shadow: 0px 8px 24px rgba(0,0,0,0.08); }
-.stButton button { background: #4da6ff; color: white; border-radius: 12px; font-size: 20px; width: 100%; }
+
+body, .stApp {
+    color: #1a1a1a !important;
+}
+
+p, li, span {
+    color: #1a1a1a !important;
+}
+
+.stButton button {
+    background:#4da6ff;
+    color:white;
+    border-radius:12px;
+    font-size:18px;
+}
+
 </style>
 """, unsafe_allow_html=True)
 
-# 5. IMAGEN FRANCISCO
-def get_img64(path):
+# IMG
+def get_img(path):
     if not os.path.exists(path): return None
-    with open(path, "rb") as f: return base64.b64encode(f.read()).decode()
-img = get_img64("francisco.png")
+    with open(path, "rb") as f:
+        return base64.b64encode(f.read()).decode()
 
-# 6. LAYOUT
-col1, col2 = st.columns([1.1, 1])
+img = get_img("francisco.png")
+
+# UI
+col1, col2 = st.columns([1.1,1])
 
 with col1:
-    st.markdown('<div class="card">', unsafe_allow_html=True)
     st.markdown("# Hola, soy Francisco 👋")
-    st.markdown("### Voy a ayudarte paso a paso con tu estudio.")
-    st.markdown("""<div style="background:#f0f7ff; padding:15px; border-radius:12px; border-left:5px solid #4da6ff; font-size:16px; color:#1a5c96;">
-    <i>"La Endoscopía representa hoy, la mejor técnica para el diagnóstico y prevención del Cáncer de Colon."</i>
-    </div>""", unsafe_allow_html=True)
-    
-    opcion = st.radio("¿En qué etapa te encuentras?", ["Seleccionar...", "ANTES DE MI ENDOSCOPIA", "MI PREPARACIÓN", "DESPUÉS DE MI ENDOSCOPIA"])
-    
-    if st.button("🔄 REINICIAR"): reiniciar()
-    st.markdown('</div>', unsafe_allow_html=True)
+    opcion = st.radio("Elegí:", ["ANTES DE MI ENDOSCOPIA","MI PREPARACIÓN","DESPUÉS DE MI ENDOSCOPIA"])
+    if st.button("Reiniciar"):
+        reiniciar()
 
 with col2:
     if img:
-        st.markdown(f'<div style="display:flex;justify-content:center;"><img src="data:image/png;base64,{img}" style="width:100%;max-width:400px;border-radius:24px;"></div>', unsafe_allow_html=True)
+        st.image(f"data:image/png;base64,{img}")
 
-# 7. LÓGICA DE CONTENIDO
+# LOGICA
+
 if opcion == "ANTES DE MI ENDOSCOPIA":
-    st.header("📋 Instrucciones Previas")
-    st.markdown(f'<div style="background:white;padding:25px;border-radius:15px;border-left:10px solid #4da6ff;">{TEXTO_ANTES.replace(chr(10), "<br>")}</div>', unsafe_allow_html=True)
-    st.header("🍎 Dieta 3 días previos")
-    mostrar_docx("textos/Dieta comun 3 días PREVIOS AL ESTUDIO.docx")
+    st.header("Indicaciones")
+    st.markdown(TEXTO_ANTES.replace("\n","<br>"), unsafe_allow_html=True)
 
 elif opcion == "MI PREPARACIÓN":
-    st.subheader("Configura tu plan")
-    familia = st.selectbox("Preparación", ["FOSFATOS", "PICOSULFATO", "POLIETINELGLICOL", "BAREX KIT"])
-    franja = st.radio("Horario del estudio", ["7 A 12", "12 A 16", "16 A 19"])
 
-    if st.button("GENERAR PLAN"):
-        archivo = ""
-        if familia == "BAREX KIT":
-            archivo = "textos/BAREX KIT DE 7 A 12.docx" if franja == "7 A 12" else "textos/BAREX KIT DE 12 A 19.docx"
-        else:
-            archivo = f"textos/{familia} DE {franja}.docx" if familia != "POLIETINELGLICOL" else f"textos/POLIETINELGLICOL 4 litros de {franja}HS.docx"
+    familia = st.selectbox("Preparación", ["FOSFATOS","PICOSULFATO","POLIETILENGLICOL","BAREX KIT"])
+    franja = st.radio("Horario", ["7 A 12","12 A 16","16 A 19"])
 
-        st.success("Plan generado.")
-        mostrar_docx(archivo)
-        
-        secciones = {"Indicaciones": TEXTO_ANTES, "Tu Plan": texto_docx(archivo), "Post-Estudio": TEXTO_POST}
-        try:
-            path_pdf = generar_pdf_profesional(f"{familia} - {franja}", secciones)
-            with open(path_pdf, "rb") as f:
-                st.download_button("📩 DESCARGAR PLAN PDF", f.read(), file_name=f"Plan_{familia}.pdf", mime="application/pdf")
-        except: st.error("Error al crear PDF. Verifica los archivos en la carpeta 'textos'.")
+    # archivo
+    if familia == "BAREX KIT":
+        archivo = "textos/BAREX KIT DE 7 A 12.docx" if franja=="7 A 12" else "textos/BAREX KIT DE 12 A 19.docx"
+    elif familia == "POLIETILENGLICOL":
+        archivo = f"textos/POLIETILENGLICOL 4 litros de {franja}HS.docx"
+    else:
+        archivo = f"textos/{familia} DE {franja}.docx"
+
+    st.subheader("Tu preparación")
+    mostrar_docx(archivo)
+
+    # PDF DIRECTO (SIN BOTÓN GENERAR)
+    secciones = {
+        "Antes del estudio": TEXTO_ANTES,
+        "Después del estudio": TEXTO_POST
+    }
+
+    pdf = generar_pdf(f"{familia} - {franja}", secciones)
+
+    with open(pdf, "rb") as f:
+        st.download_button(
+            "📄 Descargar PDF",
+            f.read(),
+            file_name=f"Plan_{familia}_{franja.replace(' ','_')}.pdf",
+            mime="application/pdf"
+        )
 
 elif opcion == "DESPUÉS DE MI ENDOSCOPIA":
-    st.header("🏁 Recomendaciones Post-Estudio")
-    st.markdown(f'<div style="background:white;padding:25px;border-radius:15px;border-left:10px solid #2ecc71;">{TEXTO_POST.replace(chr(10), "<br>")}</div>', unsafe_allow_html=True)
+    st.header("Post estudio")
+    st.markdown(TEXTO_POST.replace("\n","<br>"), unsafe_allow_html=True)
