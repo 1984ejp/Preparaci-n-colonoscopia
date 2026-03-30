@@ -67,9 +67,8 @@ def texto_docx(ruta_relativa):
 
 def mostrar_docx(ruta_relativa):
     texto = texto_docx(ruta_relativa)
-    # Agregado color:#333333 !important para visibilidad
     st.markdown(f"""
-    <div style="background:white; padding:20px; border-radius:15px; border-left:8px solid #4da6ff; margin-bottom:20px; font-size:20px; box-shadow:0px 4px 12px rgba(0,0,0,0.05); color: #333333 !important;">
+    <div style="background-color:white; padding:20px; border-radius:15px; border-left:8px solid #4da6ff; margin-bottom:20px; font-size:20px; box-shadow:0px 4px 12px rgba(0,0,0,0.05); color: #333333 !important;">
     {texto.replace(chr(10), '<br>')}
     </div>
     """, unsafe_allow_html=True)
@@ -91,30 +90,32 @@ def generar_pdf_profesional(titulo_plan, secciones):
     doc.build(elementos)
     return tmp.name
 
-# 4. ESTILOS CSS (REFORZADOS PARA MODO OSCURO)
+# 4. ESTILOS CSS (REFINADOS)
 st.markdown("""
 <style>
 .stApp { background: linear-gradient(180deg,#e9f0f7,#dfe8f3); }
 .card { 
-    background: white !important; 
+    background-color: white !important; 
     padding: 28px; 
     border-radius: 22px; 
     box-shadow: 0px 8px 24px rgba(0,0,0,0.08); 
-    color: #1a5c96 !important;
+    margin-bottom: 20px;
 }
-/* Forzamos color en todos los textos dentro de la tarjeta */
-.card h1, .card h3, .card p, .card div, .card span {
+/* Forzamos color oscuro en textos clave */
+.card h1, .card h3, .card p, .card span, .card i {
     color: #1a5c96 !important;
 }
 .stButton button { 
-    background: #4da6ff !important; 
+    background-color: #4da6ff !important; 
     color: white !important; 
     border-radius: 12px; 
     font-size: 20px; 
     width: 100%; 
 }
-/* Forzar visibilidad en radio buttons y selectboxes */
-label p { color: #1a5c96 !important; font-weight: bold; }
+/* Asegura que los textos fuera de la card también se vean */
+h1, h2, h3, p, span, label {
+    color: #1a5c96 !important;
+}
 </style>
 """, unsafe_allow_html=True)
 
@@ -131,9 +132,13 @@ with col1:
     st.markdown('<div class="card">', unsafe_allow_html=True)
     st.markdown("# Hola, soy Francisco 👋")
     st.markdown("### Voy a ayudarte paso a paso con tu estudio.")
-    st.markdown("""<div style="background:#f0f7ff; padding:15px; border-radius:12px; border-left:5px solid #4da6ff; font-size:16px; color:#1a5c96 !important;">
-    <i style="color:#1a5c96 !important;">"La Endoscopía representa hoy, la mejor técnica para el diagnóstico y prevención del Cáncer de Colon."</i>
-    </div>""", unsafe_allow_html=True)
+    st.markdown(f"""
+    <div style="background-color:#f0f7ff; padding:15px; border-radius:12px; border-left:5px solid #4da6ff; margin-top:10px;">
+        <span style="color:#1a5c96 !important; font-style: italic; font-size:16px;">
+        "La Endoscopía representa hoy, la mejor técnica para el diagnóstico y prevención del Cáncer de Colon."
+        </span>
+    </div>
+    """, unsafe_allow_html=True)
     
     opcion = st.radio("¿En qué etapa te encuentras?", ["Seleccionar...", "ANTES DE MI ENDOSCOPIA", "MI PREPARACIÓN", "DESPUÉS DE MI ENDOSCOPIA"])
     
@@ -142,22 +147,24 @@ with col1:
 
 with col2:
     if img:
-        st.markdown(f'<div style="display:flex;justify-content:center;"><img src="data:image/png;base64,{img}" style="width:100%;max-width:400px;border-radius:24px;"></div>', unsafe_allow_html=True)
+        st.markdown(f'<div style="display:flex;justify-content:center;margin-top:20px;"><img src="data:image/png;base64,{img}" style="width:100%;max-width:400px;border-radius:24px;"></div>', unsafe_allow_html=True)
 
 # 7. LÓGICA DE CONTENIDO
 if opcion == "ANTES DE MI ENDOSCOPIA":
-    st.header("📋 Instrucciones Previas")
-    # Agregado color:#333333
-    st.markdown(f'<div style="background:white;padding:25px;border-radius:15px;border-left:10px solid #4da6ff; color:#333333 !important;">{TEXTO_ANTES.replace(chr(10), "<br>")}</div>', unsafe_allow_html=True)
-    st.header("🍎 Dieta 3 días previos")
+    st.markdown("## 📋 Instrucciones Previas")
+    st.markdown(f"""
+    <div style="background-color:white; padding:25px; border-radius:15px; border-left:10px solid #4da6ff; color:#333333 !important; font-size:18px; line-height:1.6; box-shadow: 0px 4px 12px rgba(0,0,0,0.05);">
+        {TEXTO_ANTES.replace(chr(10), "<br>")}
+    </div>
+    """, unsafe_allow_html=True)
+    st.markdown("## 🍎 Dieta 3 días previos")
     mostrar_docx("textos/Dieta comun 3 días PREVIOS AL ESTUDIO.docx")
 
 elif opcion == "MI PREPARACIÓN":
-    st.subheader("Configura tu plan")
+    st.markdown("### Configura tu plan")
     familia = st.selectbox("Preparación", ["FOSFATOS", "PICOSULFATO", "POLIETINELGLICOL", "BAREX KIT"])
     franja = st.radio("Horario del estudio", ["7 A 12", "12 A 16", "16 A 19"])
 
-    # Lógica con Session State para evitar desaparición al descargar
     if st.button("GENERAR PLAN"):
         archivo = ""
         if familia == "BAREX KIT":
@@ -179,9 +186,13 @@ elif opcion == "MI PREPARACIÓN":
             path_pdf = generar_pdf_profesional(st.session_state['plan_titulo'], secciones)
             with open(path_pdf, "rb") as f:
                 st.download_button("📩 DESCARGAR PLAN PDF", f.read(), file_name=f"Plan_{st.session_state['plan_titulo']}.pdf", mime="application/pdf")
-        except: st.error("Error al crear PDF. Verifica los archivos en la carpeta 'textos'.")
+        except: 
+            st.error("Error al crear PDF. Verifica los archivos en la carpeta 'textos'.")
 
 elif opcion == "DESPUÉS DE MI ENDOSCOPIA":
-    st.header("🏁 Recomendaciones Post-Estudio")
-    # Agregado color:#333333
-    st.markdown(f'<div style="background:
+    st.markdown("## 🏁 Recomendaciones Post-Estudio")
+    st.markdown(f"""
+    <div style="background-color:white; padding:25px; border-radius:15px; border-left:10px solid #2ecc71; color:#333333 !important; font-size:18px; line-height:1.6; box-shadow: 0px 4px 12px rgba(0,0,0,0.05);">
+        {TEXTO_POST.replace(chr(10), "<br>")}
+    </div>
+    """, unsafe_allow_html=True)
