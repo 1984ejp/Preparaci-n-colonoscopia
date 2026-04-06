@@ -117,27 +117,29 @@ img = get_img64("francisco.png")
 col1, col2 = st.columns([1.1, 1])
 
 with col1:
-    # Todo el saludo y burbujas ahora están DENTRO de la etiqueta .card
-    st.markdown('<div class="card">', unsafe_allow_html=True)
-    st.markdown("# Hola, soy Francisco 👋")
-    st.markdown("### Voy a ayudarte paso a paso con tu estudio.")
-    
+    # TODO EL SALUDO Y BURBUJAS DENTRO DE UN SOLO BLOQUE HTML
     st.markdown(f"""
-    <div class="burbuja burbuja-azul">
-        La Endoscopía representa hoy día, la mejor técnica para el diagnóstico y seguimiento de las enfermedades del Intestino Grueso, para la prevención del Cáncer de Colon y para el tratamiento de un variado número de lesiones.
-    </div>
-    <div class="burbuja burbuja-verde">
-        Durante el estudio se pueden extraer pólipos y tomar biopsias.
-    </div>
-    <div class="burbuja burbuja-amarilla">
-        Entre los riesgos potenciales, está la perforación microscópica y/o completa del Intestino Grueso. La incidencia de perforación por Colonoscopía es más común después de una terapéutica; oscila del 0.15 y el 2.14% según las series publicadas. Y para una Colonoscopía Diagnóstica, la presencia de complicaciones es de aproximadamente 1 por cada 2000 exploraciones.
+    <div class="card">
+        <h1 style="margin-top:0;">Hola, soy Francisco 👋</h1>
+        <h3>Voy a ayudarte paso a paso con tu estudio.</h3>
+        
+        <div class="burbuja burbuja-verde">
+            La Endoscopía representa hoy , la mejor  técnica para el diagnóstico y seguimiento de las enfermedades del Intestino Grueso, la prevención del Cáncer de Colon y para el tratamiento de un variado número de lesiones.
+        </div>
+        <div class="burbuja burbuja-clara">
+            Durante el estudio se pueden extraer pólipos y tomar biopsias.
+        </div>
+        <div class="burbuja burbuja-alerta">
+            Entre los riesgos potenciales, está la perforación microscópica y/o completa del Intestino Grueso. La incidencia en estudios diagnósticos es de aproximadamente 1 por cada 2000 exploraciones.
+        </div>
     </div>
     """, unsafe_allow_html=True)
     
+    # El radio button se mantiene como componente de Streamlit para que funcione el click
+    st.markdown("<br>", unsafe_allow_html=True)
     opcion = st.radio("¿En qué etapa te encuentras?", ["Seleccionar...", "ANTES DE MI ENDOSCOPIA", "MI PREPARACIÓN", "DESPUÉS DE MI ENDOSCOPIA"])
     
-    if st.button("🔄 REINICIAR"): reiniciar()
-    st.markdown('</div>', unsafe_allow_html=True)
+    if st.button("🔄 REINICIAR"): reiniciar()    st.markdown('</div>', unsafe_allow_html=True)
 
 with col2:
     if img:
