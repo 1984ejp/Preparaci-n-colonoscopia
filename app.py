@@ -117,51 +117,42 @@ def get_img64(path):
     with open(path, "rb") as f: return base64.b64encode(f.read()).decode()
 img = get_img64("francisco.png")
 
-# 6. LAYOUT PRINCIPAL (CORREGIDO PARA EVITAR CÓDIGO VISIBLE)
+# 6. LAYOUT PRINCIPAL (CORREGIDO: SIN ESPACIOS INICIALES PARA EVITAR CUADROS DE CÓDIGO)
 col1, col2 = st.columns([1.1, 1])
 
 with col1:
-    # Usamos un solo bloque de markdown para todo el contenedor blanco
-    # Esto evita que Streamlit inserte espacios o barras de desplazamiento innecesarias
-    st.markdown(f"""
-    <div class="card">
-        <h1 style="margin-top:0; padding-top:0;">Hola, soy Francisco 👋</h1>
-        <h3 style="color: #444 !important; margin-bottom:20px;">Voy a ayudarte paso a paso con tu estudio.</h3>
-        
-        <div class="burbuja-verde-solida" style="padding:18px; border-radius:15px; margin-bottom:12px; background-color:#2bb673; color:white;">
-            La Endoscopía representa hoy, la mejor técnica para el diagnóstico y seguimiento de las enfermedades del Intestino Grueso, la prevención del Cáncer de Colon y para el tratamiento de un variado número de lesiones.
-        </div>
-        
-        <div class="burbuja-clara" style="padding:18px; border-radius:15px; margin-bottom:12px; background-color:#eafaf1; border-left:6px solid #2bb673; color:#1e7d4f;">
-            Durante el estudio se pueden extraer pólipos y tomar biopsias.
-        </div>
-        
-        <div class="burbuja-amarilla" style="padding:18px; border-radius:15px; margin-bottom:12px; background-color:#fef9e7; border-left:6px solid #f1c40f; color:#1a5c96;">
-            Entre los riesgos potenciales, está la perforación microscópica y/o completa del Intestino Grueso. La incidencia en estudios diagnósticos es de aproximadamente 1 por cada 2000 exploraciones.
-        </div>
-    </div>
-    """, unsafe_allow_html=True)
+    # IMPORTANTE: El texto dentro de las comillas debe estar pegado al margen izquierdo
+    contenido_bienvenida = f"""
+<div class="card">
+<h1 style="margin-top:0; padding-top:0;">Hola, soy Francisco 👋</h1>
+<h3 style="color: #444 !important; margin-bottom:20px;">Voy a ayudarte paso a paso con tu estudio.</h3>
+<div style="padding:18px; border-radius:15px; margin-bottom:12px; background-color:#2bb673; color:white;">
+La Endoscopía representa hoy, la mejor técnica para el diagnóstico y seguimiento de las enfermedades del Intestino Grueso, la prevención del Cáncer de Colon y para el tratamiento de un variado número de lesiones.
+</div>
+<div style="padding:18px; border-radius:15px; margin-bottom:12px; background-color:#eafaf1; border-left:6px solid #2bb673; color:#1e7d4f;">
+Durante el estudio se pueden extraer pólipos y tomar biopsias.
+</div>
+<div style="padding:18px; border-radius:15px; margin-bottom:12px; background-color:#fef9e7; border-left:6px solid #f1c40f; color:#1a5c96;">
+Entre los riesgos potenciales, está la perforación microscópica y/o completa del Intestino Grueso. La incidencia en estudios diagnósticos es de aproximadamente 1 por cada 2000 exploraciones.
+</div>
+</div>
+"""
+    st.markdown(contenido_bienvenida, unsafe_allow_html=True)
     
     st.markdown("<br>", unsafe_allow_html=True)
-    
-    # Selector de etapa
     opcion = st.radio("¿En qué etapa te encuentras?", 
-                      ["Seleccionar...", "ANTES DE MI ENDOSCOPIA", "MI PREPARACIÓN", "DESPUÉS DE MI ENDOSCOPIA"],
-                      key="selector_etapa")
-    
-    st.markdown("<br>", unsafe_allow_html=True)
+                      ["Seleccionar...", "ANTES DE MI ENDOSCOPIA", "MI PREPARACIÓN", "DESPUÉS DE MI ENDOSCOPIA"])
     
     if st.button("🔄 REINICIAR"):
         reiniciar()
 
 with col2:
     if img:
-        # Imagen alineada y con bordes limpios
         st.markdown(f"""
-            <div style="display:flex; justify-content:center; align-items:flex-start;">
-                <img src="data:image/png;base64,{img}" style="width:100%; max-width:400px; border-radius:50%; border: 8px solid white; box-shadow: 0px 10px 25px rgba(0,0,0,0.1);">
-            </div>
-        """, unsafe_allow_html=True)
+<div style="display:flex; justify-content:center; align-items:flex-start;">
+<img src="data:image/png;base64,{img}" style="width:100%; max-width:400px; border-radius:50%; border: 8px solid white; box-shadow: 0px 10px 25px rgba(0,0,0,0.1);">
+</div>
+""", unsafe_allow_html=True)
 
 # 7. LÓGICA DE CONTENIDO
 if opcion == "ANTES DE MI ENDOSCOPIA":
