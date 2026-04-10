@@ -39,6 +39,7 @@ def texto_docx(ruta_relativa):
 
 def mostrar_docx(ruta_relativa):
     texto = texto_docx(ruta_relativa)
+    # Cambiado color azul por verde #2bb673
     st.markdown(f"""
     <div style="background-color:white; padding:20px; border-radius:15px; border-left:8px solid #2bb673; margin-bottom:20px; font-size:20px; box-shadow:0px 4px 12px rgba(0,0,0,0.05); color: #333333 !important;">
     {texto.replace(chr(10), '<br>')}
@@ -49,6 +50,7 @@ def generar_pdf_profesional(titulo_plan, secciones):
     tmp = tempfile.NamedTemporaryFile(delete=False, suffix=".pdf")
     doc = SimpleDocTemplate(tmp.name, pagesize=A4, rightMargin=50, leftMargin=50, topMargin=50, bottomMargin=50)
     styles = getSampleStyleSheet()
+    # Cambiado color azul por verde #2bb673
     estilo_titulo = ParagraphStyle('T', parent=styles['Heading1'], fontSize=18, spaceAfter=20, textColor="#1e7d4f")
     estilo_sub = ParagraphStyle('S', parent=styles['Heading2'], fontSize=14, spaceBefore=15, textColor="#2bb673")
     estilo_txt = ParagraphStyle('X', parent=styles['Normal'], fontSize=11, leading=14)
@@ -65,19 +67,20 @@ def generar_pdf_profesional(titulo_plan, secciones):
 # 4. ESTILOS CSS (GAMA VERDE ESMERALDA)
 st.markdown("""
 <style>
-.stApp { background-color: #f4f7f6; }
+/* Degradado de fondo en verde suave */
+.stApp { background: linear-gradient(180deg,#eafaf1,#dfeae3); }
 
-/* Ajuste de la tarjeta blanca */
+/* Ajuste de la tarjeta blanca para que contenga todo sin espacios extra arriba */
 .card { 
     background-color: white !important; 
     padding: 30px; 
     border-radius: 22px; 
-    box-shadow: 0px 8px 24px rgba(0,0,0,0.06); 
+    box-shadow: 0px 8px 24px rgba(0,0,0,0.08); 
     margin-top: 0px; 
-    border-top: 10px solid #2bb673;
+    border-top: 10px solid #2bb673; /* Barra verde superior */
 }
 
-/* Colores de texto */
+/* Colores de texto forzados */
 h1, h2, h3 { color: #2bb673 !important; }
 p, span, label { color: #1e7d4f !important; }
 
@@ -118,7 +121,7 @@ img = get_img64("francisco.png")
 col1, col2 = st.columns([1.1, 1])
 
 with col1:
-    # Bloque de saludo encapsulado para evitar espacios y errores de sintaxis
+    # TODO EL SALUDO Y BURBUJAS DENTRO DE UN SOLO BLOQUE HTML
     st.markdown(f"""
     <div class="card">
         <h1 style="margin-top:0;">Hola, soy Francisco 👋</h1>
@@ -145,9 +148,11 @@ with col1:
 with col2:
     if img:
         st.markdown(f'<div style="display:flex;justify-content:center;margin-top:10px;"><img src="data:image/png;base64,{img}" style="width:100%;max-width:400px;border-radius:50%; border: 8px solid white; box-shadow: 0px 10px 25px rgba(0,0,0,0.1);"></div>', unsafe_allow_html=True)
+
 # 7. LÓGICA DE CONTENIDO
 if opcion == "ANTES DE MI ENDOSCOPIA":
     st.markdown(f"## <span style='color:#2bb673'>📋 Instrucciones Previas</span>", unsafe_allow_html=True)
+    # Cambiado color azul por verde #2bb673
     st.markdown(f"""
     <div style="background-color:white; padding:25px; border-radius:15px; border-left:10px solid #2bb673; color:#333333 !important; font-size:18px; line-height:1.6; box-shadow: 0px 4px 12px rgba(0,0,0,0.05);">
         {TEXTO_ANTES.replace(chr(10), "<br>")}
@@ -187,9 +192,29 @@ elif opcion == "MI PREPARACIÓN":
 
 elif opcion == "DESPUÉS DE MI ENDOSCOPIA":
     st.markdown("## 🏁 Recomendaciones Post-Estudio")
-    st.markdown(f"""
-    <div class="burbuja burbuja-clara"><b>1. OBSERVACIONES:</b> Permanecer bajo vigilancia en recuperación.</div>
-    <div class="burbuja burbuja-gris"><b>2. CUIDADOS:</b> No conducir ni realizar esfuerzos físicos por 12 horas.</div>
-    <div class="burbuja burbuja-roja"><b>3. ALERTA:</b> Consulte si presenta dolor intenso o fiebre.</div>
-    <div class="burbuja burbuja-verde-solida"><b>4. CONTACTO:</b> Gastroenterología Urgencias: 11 5596 2440.</div>
+    st.info("Siga estas recomendaciones para su seguridad:")
+    
+    # RESTRABLECIDA LA ESTRUCTURA ORIGINAL Y TEXTOS DE LAS BURBUJAS
+    st.markdown("""
+    <div class="burbuja burbuja-clara">
+        <b>1. OBSERVACIONES INICIALES</b><br>
+        • Permanecer bajo vigilancia en la sala de recuperación hasta recuperar estado de alerta y estabilidad vital.<br>
+        • Evite actividades que requieran coordinación por 12 horas post-procedimiento.<br>
+        • No conducir ni firmar documentos importantes por 12 horas.
+    </div>
+    <div class="burbuja burbuja-gris">
+        <b>2. CUIDADOS EN EL DOMICILIO</b><br>
+        • Descansar y evitar esfuerzos físicos importantes.<br>
+        • Mantener dieta ligera las primeras horas, según indicación médica.<br>
+        • Evitar consumo de alcohol y medicamentos sedantes sin indicación.
+    </div>
+    <div class="burbuja burbuja-roja">
+        <b>3. SIGNOS DE ALARMA – ACUDIR DE INMEDIATO</b><br>
+        Consulte urgentemente si presenta dolor abdominal intenso o repentino, fiebre mayor o igual a 38, sangrado abundante o vómitos persistentes.
+    </div>
+    <div class="burbuja burbuja-verde-solida">
+        <b>4. CONTACTO DE URGENCIA</b><br>
+        • Gastroenterología CEMIC (08 a 20hs): 11 5596 2440.<br>
+        • Guardias CEMIC Saavedra (Galván 4102) o Pombo (Av. Cnel. Díaz 2423).
+    </div>
     """, unsafe_allow_html=True)
