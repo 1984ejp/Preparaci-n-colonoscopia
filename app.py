@@ -118,7 +118,78 @@ img = get_img64("francisco.png")
 col1, col2 = st.columns([1.1, 1])
 
 with col1:
-    # TODO EL SALUDO Y BURBUJAS DENTRO DE UN SOLO BLOQUE HTML
+    # Bloque de saludo encapsulado para evitar espacios y errores de sintaxis
     st.markdown(f"""
     <div class="card">
         <h1 style="margin-top:0;">Hola, soy Francisco 👋</h1>
+        <h3 style="color: #444 !important;">Voy a ayudarte paso a paso con tu estudio.</h3>
+        
+        <div class="burbuja burbuja-verde-solida">
+            La Endoscopía representa hoy, la mejor técnica para el diagnóstico y seguimiento de las enfermedades del Intestino Grueso, la prevención del Cáncer de Colon y para el tratamiento de un variado número de lesiones.
+        </div>
+        <div class="burbuja burbuja-clara">
+            Durante el estudio se pueden extraer pólipos y tomar biopsias.
+        </div>
+        <div class="burbuja burbuja-amarilla">
+            Entre los riesgos potenciales, está la perforación microscópica y/o completa del Intestino Grueso. La incidencia en estudios diagnósticos es de aproximadamente 1 por cada 2000 exploraciones.
+        </div>
+    </div>
+    """, unsafe_allow_html=True)
+    
+    st.markdown("<br>", unsafe_allow_html=True)
+    opcion = st.radio("¿En qué etapa te encuentras?", ["Seleccionar...", "ANTES DE MI ENDOSCOPIA", "MI PREPARACIÓN", "DESPUÉS DE MI ENDOSCOPIA"])
+    
+    if st.button("🔄 REINICIAR"):
+        reiniciar()
+
+with col2:
+    if img:
+        st.markdown(f'<div style="display:flex;justify-content:center;margin-top:10px;"><img src="data:image/png;base64,{img}" style="width:100%;max-width:400px;border-radius:50%; border: 8px solid white; box-shadow: 0px 10px 25px rgba(0,0,0,0.1);"></div>', unsafe_allow_html=True)
+# 7. LÓGICA DE CONTENIDO
+if opcion == "ANTES DE MI ENDOSCOPIA":
+    st.markdown(f"## <span style='color:#2bb673'>📋 Instrucciones Previas</span>", unsafe_allow_html=True)
+    st.markdown(f"""
+    <div style="background-color:white; padding:25px; border-radius:15px; border-left:10px solid #2bb673; color:#333333 !important; font-size:18px; line-height:1.6; box-shadow: 0px 4px 12px rgba(0,0,0,0.05);">
+        {TEXTO_ANTES.replace(chr(10), "<br>")}
+    </div>
+    """, unsafe_allow_html=True)
+    st.markdown("## 🍎 Dieta 3 días previos")
+    mostrar_docx("textos/Dieta comun 3 días PREVIOS AL ESTUDIO.docx")
+
+elif opcion == "MI PREPARACIÓN":
+    st.markdown("### Configura tu plan")
+    familia = st.selectbox("Preparación", ["FOSFATOS", "PICOSULFATO", "POLIETINELGLICOL", "BAREX KIT"])
+    franja = st.radio("Horario del estudio", ["7 A 12", "12 A 16", "16 A 19"])
+
+    if st.button("GENERAR PLAN"):
+        archivo = ""
+        if familia == "BAREX KIT":
+            archivo = "textos/BAREX KIT DE 7 A 12.docx" if franja == "7 A 12" else "textos/BAREX KIT DE 12 A 19.docx"
+        else:
+            archivo = f"textos/{familia} DE {franja}.docx" if familia != "POLIETINELGLICOL" else f"textos/POLIETINELGLICOL 4 litros de {franja}HS.docx"
+        
+        st.session_state['plan_listo'] = True
+        st.session_state['archivo_ruta'] = archivo
+        st.session_state['plan_titulo'] = f"{familia} - {franja}"
+
+    if st.session_state.get('plan_listo'):
+        archivo = st.session_state['archivo_ruta']
+        st.success("Plan generado.")
+        mostrar_docx(archivo)
+        
+        secciones = {"Indicaciones": TEXTO_ANTES, "Tu Plan": texto_docx(archivo)}
+        try:
+            path_pdf = generar_pdf_profesional(st.session_state['plan_titulo'], secciones)
+            with open(path_pdf, "rb") as f:
+                st.download_button("📩 DESCARGAR PLAN PDF", f.read(), file_name=f"Plan_{st.session_state['plan_titulo']}.pdf", mime="application/pdf")
+        except: 
+            st.error("Error al crear PDF.")
+
+elif opcion == "DESPUÉS DE MI ENDOSCOPIA":
+    st.markdown("## 🏁 Recomendaciones Post-Estudio")
+    st.markdown(f"""
+    <div class="burbuja burbuja-clara"><b>1. OBSERVACIONES:</b> Permanecer bajo vigilancia en recuperación.</div>
+    <div class="burbuja burbuja-gris"><b>2. CUIDADOS:</b> No conducir ni realizar esfuerzos físicos por 12 horas.</div>
+    <div class="burbuja burbuja-roja"><b>3. ALERTA:</b> Consulte si presenta dolor intenso o fiebre.</div>
+    <div class="burbuja burbuja-verde-solida"><b>4. CONTACTO:</b> Gastroenterología Urgencias: 11 5596 2440.</div>
+    """, unsafe_allow_html=True)
