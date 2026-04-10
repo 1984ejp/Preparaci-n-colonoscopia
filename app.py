@@ -196,30 +196,58 @@ elif opcion == "MI PREPARACIÓN":
             st.error("Error al crear PDF.")
 
 elif opcion == "DESPUÉS DE MI ENDOSCOPIA":
-    st.markdown("## 🏁 Recomendaciones Post-Estudio")
-    st.info("Siga estas recomendaciones para su seguridad:")
+    st.markdown(f"## <span style='color:#2bb673'>🏁 Recomendaciones Post-Estudio</span>", unsafe_allow_html=True)
     
-    # RESTRABLECIDA LA ESTRUCTURA ORIGINAL Y TEXTOS DE LAS BURBUJAS
-    st.markdown("""
-    <div class="burbuja burbuja-clara">
-        <b>1. OBSERVACIONES INICIALES</b><br>
-        • Permanecer bajo vigilancia en la sala de recuperación hasta recuperar estado de alerta y estabilidad vital.<br>
-        • Evite actividades que requieran coordinación por 12 horas post-procedimiento.<br>
-        • No conducir ni firmar documentos importantes por 12 horas.
-    </div>
-    <div class="burbuja burbuja-gris">
-        <b>2. CUIDADOS EN EL DOMICILIO</b><br>
-        • Descansar y evitar esfuerzos físicos importantes.<br>
-        • Mantener dieta ligera las primeras horas, según indicación médica.<br>
-        • Evitar consumo de alcohol y medicamentos sedantes sin indicación.
-    </div>
-    <div class="burbuja burbuja-roja">
-        <b>3. SIGNOS DE ALARMA – ACUDIR DE INMEDIATO</b><br>
-        Consulte urgentemente si presenta dolor abdominal intenso o repentino, fiebre mayor o igual a 38, sangrado abundante o vómitos persistentes.
-    </div>
-    <div class="burbuja burbuja-verde-solida">
-        <b>4. CONTACTO DE URGENCIA</b><br>
-        • Gastroenterología CEMIC (08 a 20hs): 11 5596 2440.<br>
-        • Guardias CEMIC Saavedra (Galván 4102) o Pombo (Av. Cnel. Díaz 2423).
-    </div>
-    """, unsafe_allow_html=True)
+    # Definimos el contenido en una variable pegada al margen izquierdo para evitar el error de visualización
+    contenido_post = f"""
+<div style="font-family: sans-serif;">
+<div style="padding:18px; border-radius:15px; margin-bottom:12px; background-color:#eafaf1; border-left:6px solid #2bb673; color:#1e7d4f;">
+<b>1. OBSERVACIONES INICIALES</b><br>
+• Permanecer bajo vigilancia en la sala de recuperación endoscópica hasta que recupere estado de alerta y estabilidad vital.<br>
+• Evite realizar actividades que requieran coordinación hasta pasadas al menos 12 horas post-procedimiento.<br>
+• Evite conducir, manejar maquinaria o firmar documentos importantes durante las primeras 12 horas post procedimiento.
+</div>
+
+<div style="padding:18px; border-radius:15px; margin-bottom:12px; background-color:#f4f6f7; border-left:6px solid #95a5a6; color:#333;">
+<b>2. CUIDADOS EN EL DOMICILIO</b><br>
+• Descansar y evitar esfuerzos físicos importantes.<br>
+• Mantener dieta ligera las primeras horas, según indicación del médico.<br>
+• Evitar consumo de alcohol y medicamentos sedantes sin indicación.<br>
+• Seguir indicaciones sobre la reanudación de su medicación habitual.<br>
+• Controlar signos vitales si es posible: fiebre, pulso irregular o dolor intenso.
+</div>
+
+<div style="padding:18px; border-radius:15px; margin-bottom:12px; background-color:#fdedec; border-left:6px solid #e74c3c; color:#c0392b;">
+<b>3. SIGNOS DE ALARMA – ACUDIR DE INMEDIATO</b><br>
+Consulte urgentemente al endoscopista o concurra a la guardia del hospital si presenta:<br>
+• Dolor abdominal intenso o repentino<br>
+• Fiebre ≥ 38°C<br>
+• Sangrado abundante por boca, nariz o recto<br>
+• Vómitos persistentes o con sangre<br>
+• Dificultad respiratoria o sensación de desmayo<br>
+• Hinchazón abdominal marcada o sensación de abdomen duro
+</div>
+
+<div style="padding:18px; border-radius:15px; margin-bottom:12px; background-color:#eafaf1; border-left:6px solid #2bb673; color:#1e7d4f;">
+<b>4. CONTACTO DE URGENCIA</b><br>
+• Contactarse al número de teléfono de Gastroenterología del CEMIC entre las 08:00 hs. y 20:00 hs: <b>11 5596 2440</b>.<br>
+• Fuera de este horario, concurrir directamente a la guardia del CEMIC: Galván 4102 (Saavedra) o Av. Cnel. Díaz 2423 (Pombo).<br>
+• Informar al médico de guardia que lo evalúa para que avise inmediatamente al endoscopista participante.
+</div>
+
+<div style="padding:18px; border-radius:15px; margin-bottom:12px; background-color:#fef9e7; border-left:6px solid #f1c40f; color:#856404;">
+<b>5. INDICACIONES IMPORTANTES PRIMERAS 12 HORAS</b><br>
+• Mantenerse acompañado si es posible.<br>
+• No realizar actividad física, no conducir ni operar maquinaria.<br>
+• Seguir las recomendaciones de dieta y medicación indicadas por el equipo médico.<br>
+• Guardar esta hoja y mostrarla en caso de urgencia.
+</div>
+
+<div style="padding:18px; border-radius:15px; margin-bottom:12px; background-color:#ffffff; border:1px solid #2bb673; border-left:6px solid #2bb673; color:#1e7d4f;">
+<b>6. TOMA DE MUESTRAS - ANATOMÍA PATOLÓGICA</b><br>
+• Si se realizó toma de muestras/biopsias, el resultado será enviado automáticamente a su mail registrado en CEMIC.<br>
+• De no recibirlo en 21 días, pedirlo a: <b>informespatologia@cemic.edu.ar</b>. (No se retiran más de forma impresa).
+</div>
+</div>
+"""
+    st.markdown(contenido_post, unsafe_allow_html=True)
