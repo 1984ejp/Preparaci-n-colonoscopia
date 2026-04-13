@@ -136,30 +136,52 @@ elif opcion == "DESPUÉS DE MI ENDOSCOPIA":
 <div style="color: #1a1a1a !important;">
 <div style="padding:18px; border-radius:15px; margin-bottom:12px; background-color:#eafaf1; border-left:6px solid #2bb673; color:#1e7d4f;">
 <b>1. OBSERVACIONES INICIALES</b><br>
-• Permanecer bajo vigilancia en la sala de recuperación hasta que recupere estado de alerta y estabilidad vital.<br>
-• Evite realizar actividades que requieran coordinación hasta pasadas al menos 12 horas.<br>
-• Evite conducir o firmar documentos durante las primeras 12 horas.
+• Permanecer bajo vigilancia en la sala de recuperación endoscópica hasta que recupere estado de alerta y
+estabilidad vital.
+• Evite realizar actividades que requieran coordinación hasta pasadas al menos 12 horas post-procedimiento.
+• Evite conducir, manejar maquinaria o firmar documentos importantes durante las primeras 12 horas post
+procedimiento.
 </div>
 <div style="padding:18px; border-radius:15px; margin-bottom:12px; background-color:#f4f6f7; border-left:6px solid #95a5a6; color:#333;">
 <b>2. CUIDADOS EN EL DOMICILIO</b><br>
-• Descansar y evitar esfuerzos. Mantener dieta ligera. Evitar alcohol y sedantes.
+• Descansar y evitar esfuerzos físicos importantes.
+• Mantener dieta ligera las primeras horas, según indicación del médico.
+• Evitar consumo de alcohol y medicamentos sedantes sin indicación.
+• Seguir indicaciones sobre la reanudación de su medicación habitual.
+• Controlar signos vitales si es posible: fiebre, pulso irregular o dolor intenso.
 </div>
 <div style="padding:18px; border-radius:15px; margin-bottom:12px; background-color:#fdedec; border-left:6px solid #e74c3c; color:#c0392b;">
 <b>3. SIGNOS DE ALARMA</b><br>
-Consulte urgente si presenta: Dolor abdominal intenso, Fiebre ≥ 38°C, Sangrado abundante o Vómitos.
+Consulte urgentemente al endoscopista o concurra a la guardia del hospital si presenta:
+• Dolor abdominal intenso o repentino.
+• Fiebre ≥ 38°C.
+• Sangrado abundante por boca, nariz o recto.
+• Vómitos persistentes o con sangre.
+• Dificultad respiratoria o sensación de desmayo.
+• Hinchazón abdominal marcada o sensación de abdomen duro.
 </div>
 <div style="padding:18px; border-radius:15px; margin-bottom:12px; background-color:#eafaf1; border-left:6px solid #2bb673; color:#1e7d4f;">
 <b>4. CONTACTO DE URGENCIA</b><br>
-• Gastroenterología CEMIC (08 a 20 hs): 11 5596 2440.<br>
-• Fuera de horario: Guardia CEMIC Galván 4102 o Av. Cnel. Díaz 2423.
+• Contactarse al número de teléfono de Gastroenterología del CEMIC entre las 08:00 hs. y 20:00 hs.
+11 5596 2440.
+• Fuera de este horario, concurrir directamente a la guardia del CEMIC, Galván 4102 CABA CEMIC Saavedra o
+Av. Cnel. Díaz 2423 CABA CEMIC Pombo.
+• Informar que el médico de guardia que lo evalúa, avise inmediatamente al endoscopista participante sobre
+cualquier síntoma grave.
 </div>
 <div style="padding:18px; border-radius:15px; margin-bottom:12px; background-color:#fef9e7; border-left:6px solid #f1c40f; color:#856404;">
 <b>5. INDICACIONES IMPORTANTES</b><br>
-• Mantenerse acompañado. No conducir. Guardar esta hoja.
+• Mantenerse acompañado si es posible.
+• No realizar actividad física, no conducir ni operar maquinaria
+• Seguir las recomendaciones de dieta y medicación indicadas por el equipo médico
+• Guardar esta hoja y mostrarla en caso de urgencia
 </div>
 <div style="padding:18px; border-radius:15px; margin-bottom:12px; background-color:#ffffff; border:1px solid #2bb673; border-left:6px solid #2bb673; color:#1e7d4f;">
 <b>6. TOMA DE MUESTRAS - ANATOMÍA PATOLÓGICA</b><br>
-• El resultado será enviado automáticamente a su mail registrado. Si no lo recibe en 21 días, pídalo a informespatologia@cemic.edu.ar.
+• Si el profesional tratante realizo toma de muestras/biopsias, el resultado será enviado automáticamente a
+su casilla de mail registrada en la base de datos de Cemic.
+• De no recibir el resultado en 21 días deberá pedirlo vía mail a la siguiente casilla de correo
+informespatologia@cemic.edu.ar. (Los resultados ya no se podrán retirar impresos en ninguna Sede).
 </div>
 </div>
 """
