@@ -7,25 +7,25 @@ from reportlab.lib.styles import getSampleStyleSheet, ParagraphStyle
 from reportlab.platypus import SimpleDocTemplate, Paragraph, Spacer
 import tempfile
 
-# 1. CONFIGURACIÓN
-st.set_page_config(page_title="Asistente Francisco", layout="wide")
+# 1. CONFIGURACIÓN DE PÁGINA
+st.set_page_config(page_title="Asistente Endoscopía - Francisco", layout="wide")
 
-# 2. TEXTO FIJO (Sin caracteres especiales ocultos)
+# 2. TEXTOS FIJOS (RESTAURADOS ÍNTEGROS)
 TEXTO_ANTES = """
-⚠️ Si toma medicación que altere la coagulación debe consultarlo con su hematólogo.
-📄 Debe traer la orden del estudio vigente y autorizada.
+⚠️ Si toma medicación que altere la coagulación de la sangre debe recordárselo a su médico con anticipación y consultarlo con su médico hematólogo.
+📄 Debe traer la orden del estudio vigente y debidamente autorizada si corresponde.
 👥 Debe concurrir acompañado.
-✅ PODRÁ REALIZAR EL ESTUDIO SI CUMPLE CON LO ANTERIOR.
-⏰ 8 hs antes suspenda sólidos y lácteos. Agua o Gatorade hasta 4 hs antes.
-🚫 Sin uñas pintadas, anillos ni piercings.
-💧 Realice la preparación en su domicilio (produce diarrea intensa).
-⚠️ Durante el estudio se pueden extraer pólipos y tomar biopsias. La incidencia de complicaciones es baja (1 cada 2000 aprox).
+✅ PODRÁ REALIZAR EL ESTUDIO SI CUMPLE CON LOS 4 ÍTEMS ANTERIORES.
+⏰ 8 hs antes del estudio suspende todo alimento sólido y lácteo. Puede continuar con agua y/o Gatorade (sabor manzana o limón) hasta 4 hs antes del procedimiento.
+🚫 NO debe concurrir con las uñas pintadas o esmaltadas.
+🚫 DEBE quitarse los anillos, aros y/o piercings antes del estudio.
+💧 Esta preparación produce una diarrea intensa, por lo que debe realizarla en su domicilio y no en su ámbito laboral.
+⚠️ Es importante que sepa que durante el estudio se pueden extraer pólipos y tomar biopsias. Entre los riesgos potenciales del método está la perforación microscópica o completa del intestino grueso. La incidencia de perforación por colonoscopía oscila entre 0.15% y 2.14%. Para una colonoscopía diagnóstica la presencia de complicaciones es aproximadamente 1 cada 2000 exploraciones.
 """
 
-# 3. FUNCIONES
+# 3. FUNCIONES DE APOYO
 def reiniciar():
-    for key in st.session_state.keys():
-        del st.session_state[key]
+    st.session_state.clear()
     st.rerun()
 
 def texto_docx(ruta_relativa):
@@ -33,116 +33,41 @@ def texto_docx(ruta_relativa):
         base_dir = os.path.dirname(os.path.abspath(__file__))
         ruta_completa = os.path.join(base_dir, ruta_relativa)
         if not os.path.exists(ruta_completa):
-            return "[Archivo no encontrado]"
+            return f"[Archivo no encontrado: {ruta_relativa}]"
         doc = Document(ruta_completa)
-        return "\n".join([p.text.strip() for p in doc.paragraphs if p.text.strip()])
+        return "\n".join([p.text.strip() for p in doc.paragraphs if p.text.strip() != ""])
     except:
-        return "[Error al leer archivo]"
+        return "[Error al leer el archivo Word]"
 
 def mostrar_docx(ruta_relativa):
     texto = texto_docx(ruta_relativa)
     st.markdown(f"""
-<div style="background-color:white; padding:20px; border-radius:15px; border-left:8px solid #2bb673; margin-bottom:20px; font-size:18px; color:#333333 !important; line-height:1.6; box-shadow:0px 4px 12px rgba(0,0,0,0.05);">
+<div style="background-color:white; padding:20px; border-radius:15px; border-left:8px solid #2bb673; margin-bottom:20px; font-size:18px; box-shadow:0px 4px 12px rgba(0,0,0,0.05); color: #1a1a1a !important; line-height: 1.6;">
 {texto.replace(chr(10), '<br>')}
 </div>
 """, unsafe_allow_html=True)
 
-# 4. ESTILOS CSS (Gama Verde y Letras Visibles)
+# 4. ESTILOS CSS (CORRECCIÓN DE VISIBILIDAD Y COLORES)
 st.markdown("""
 <style>
 .stApp { background-color: #f4f7f6; }
-/* Forzamos que todo texto de radio, select y labels sea negro */
-.stMarkdown p, .stMarkdown span, label, .stWidget label p {
-    color: #1e1e1e !important;
-    font-weight: 500;
+
+/* Forzar color de texto para que sea visible sin remarcar */
+.stMarkdown p, .stMarkdown span, .stMarkdown li, label, .stWidget label p {
+    color: #1a1a1a !important;
 }
+
 .card { 
     background-color: white !important; 
-    padding: 25px; 
-    border-radius: 20px; 
-    border-top: 8px solid #2bb673;
-    box-shadow: 0px 4px 15px rgba(0,0,0,0.05);
+    padding: 30px; 
+    border-radius: 22px; 
+    box-shadow: 0px 8px 24px rgba(0,0,0,0.08); 
+    border-top: 10px solid #2bb673;
 }
+
 h1, h2, h3 { color: #2bb673 !important; }
+
 .stButton button { 
     background-color: #2bb673 !important; 
     color: white !important; 
-    border-radius: 10px;
-}
-</style>
-""", unsafe_allow_html=True)
-
-# 5. IMAGEN
-def get_img64(path):
-    if not os.path.exists(path): return None
-    with open(path, "rb") as f: return base64.b64encode(f.read()).decode()
-img = get_img64("francisco.png")
-
-# 6. LAYOUT PRINCIPAL
-col1, col2 = st.columns([1.1, 1])
-
-with col1:
-    st.markdown(f"""
-<div class="card">
-<h1 style="margin-top:0;">Hola, soy Francisco 👋</h1>
-<p style="font-size:1.2rem; color:#444;">Voy a ayudarte paso a paso con tu estudio.</p>
-<div style="padding:15px; border-radius:12px; background-color:#2bb673; color:white; margin-bottom:10px;">
-La Endoscopía es la mejor técnica para diagnóstico y prevención del Cáncer de Colon.
-</div>
-<div style="padding:15px; border-radius:12px; background-color:#eafaf1; border-left:5px solid #2bb673; color:#1e7d4f;">
-Se pueden extraer pólipos y tomar biopsias durante el procedimiento.
-</div>
-</div>
-""", unsafe_allow_html=True)
-    
-    st.markdown("<br>", unsafe_allow_html=True)
-    opcion = st.radio("¿En qué etapa te encuentras?", ["Seleccionar...", "ANTES DE MI ENDOSCOPIA", "MI PREPARACIÓN", "DESPUÉS DE MI ENDOSCOPIA"])
-    if st.button("🔄 REINICIAR"): reiniciar()
-
-with col2:
-    if img:
-        st.markdown(f'<div style="text-align:center;"><img src="data:image/png;base64,{img}" style="width:100%; max-width:380px; border-radius:50%; border:6px solid white; box-shadow:0px 8px 20px rgba(0,0,0,0.1);"></div>', unsafe_allow_html=True)
-
-# 7. LÓGICA DE CONTENIDO
-if opcion == "ANTES DE MI ENDOSCOPIA":
-    st.markdown("## 📋 Instrucciones Previas")
-    st.markdown(f"""
-<div style="background-color:white; padding:25px; border-radius:15px; border-left:10px solid #2bb673; color:#1e1e1e !important; font-size:18px; line-height:1.6; box-shadow: 0px 4px 12px rgba(0,0,0,0.05);">
-{TEXTO_ANTES.replace(chr(10), "<br>")}
-</div>
-""", unsafe_allow_html=True)
-    st.markdown("## 🍎 Dieta 3 días previos")
-    mostrar_docx("textos/Dieta comun 3 días PREVIOS AL ESTUDIO.docx")
-
-elif opcion == "MI PREPARACIÓN":
-    st.markdown("### Configura tu plan")
-    familia = st.selectbox("Preparación", ["FOSFATOS", "PICOSULFATO", "POLIETINELGLICOL", "BAREX KIT"])
-    franja = st.radio("Horario del estudio", ["7 A 12", "12 A 16", "16 A 19"])
-    
-    if st.button("GENERAR PLAN"):
-        archivo = f"textos/{familia} DE {franja}.docx" if familia != "POLIETINELGLICOL" else f"textos/POLIETINELGLICOL 4 litros de {franja}HS.docx"
-        if familia == "BAREX KIT":
-            archivo = "textos/BAREX KIT DE 7 A 12.docx" if franja == "7 A 12" else "textos/BAREX KIT DE 12 A 19.docx"
-        st.session_state['archivo_ruta'] = archivo
-        st.session_state['plan_listo'] = True
-
-    if st.session_state.get('plan_listo'):
-        st.success("Plan cargado con éxito:")
-        mostrar_docx(st.session_state['archivo_ruta'])
-
-elif opcion == "DESPUÉS DE MI ENDOSCOPIA":
-    st.markdown("## 🏁 Recomendaciones Post-Estudio")
-    st.markdown("""
-<div style="padding:18px; border-radius:15px; margin-bottom:12px; background-color:#eafaf1; border-left:6px solid #2bb673; color:#1e7d4f;">
-<b>1. OBSERVACIONES INICIALES:</b> Vigilancia en sala hasta estar alerta. Evite coordinar tareas por 12hs.
-</div>
-<div style="padding:18px; border-radius:15px; margin-bottom:12px; background-color:#f4f6f7; border-left:6px solid #95a5a6; color:#333;">
-<b>2. CUIDADOS:</b> Descanso, dieta ligera y evitar alcohol.
-</div>
-<div style="padding:18px; border-radius:15px; margin-bottom:12px; background-color:#fdedec; border-left:6px solid #e74c3c; color:#c0392b;">
-<b>3. ALARMA:</b> Dolor intenso, Fiebre ≥ 38°C o sangrado. Concurra a guardia.
-</div>
-<div style="padding:18px; border-radius:15px; margin-bottom:12px; background-color:#ffffff; border:1px solid #2bb673; border-left:6px solid #2bb673; color:#1e7d4f;">
-<b>6. BIOPSIAS:</b> El resultado llega por mail. Si no llega en 21 días pida a informespatologia@cemic.edu.ar.
-</div>
-""", unsafe_allow_html=True)
+    border-radius: 12px;
