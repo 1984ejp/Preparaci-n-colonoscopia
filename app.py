@@ -113,16 +113,19 @@ with col1:
     <h1 style="margin-top:0;">Hola, soy Francisco 👋</h1>
     <h3 style="color:#444444 !important;">Voy a ayudarte paso a paso con tu estudio.</h3>
     <div style="padding:18px; border-radius:15px; margin-bottom:12px; background-color:#2bb673; color:white !important;">
-    <span style="color:white !important;">La Endoscopía representa hoy la mejor técnica para el diagnóstico y seguimiento de enfermedades del Intestino Grueso.</span>
-    </div>
-    <div style="padding:15px; border-radius:15px; margin-bottom:12px; background-color:#eafaf1; border-left:6px solid #2bb673; color:#1e7d4f !important;">
-    Durante el estudio se pueden extraer pólipos y tomar biopsias.
-    </div>
-    <div style="padding:15px; border-radius:15px; margin-bottom:12px; background-color:#fef9e7; border-left:6px solid #f1c40f; color:#1a5c96 !important;">
-    Incidencia de complicaciones: aproximadamente 1 por cada 2000 exploraciones.
-    </div>
-    </div>
-    """
+    <div style="padding:20px; border-radius:15px; margin-bottom:15px; background-color:#2bb673; color:white !important; font-size:18px;">
+<span style="color:white !important;">La Endoscopía representa hoy, la mejor técnica para el diagnóstico y seguimiento de las enfermedades del Intestino Grueso, la prevención del Cáncer de Colon y para el tratamiento de un variado número de lesiones.</span>
+</div>
+
+<div style="padding:18px; border-radius:15px; margin-bottom:15px; background-color:#eafaf1; border-left:6px solid #2bb673; color:#1e7d4f !important; font-size:17px;">
+Durante el estudio se pueden extraer pólipos y tomar biopsias.
+</div>
+
+<div style="padding:18px; border-radius:15px; margin-bottom:15px; background-color:#fef9e7; border-left:6px solid #f1c40f; color:#1a5c96 !important; font-size:17px;">
+Entre los riesgos potenciales, está la perforación microscópica y/o completa del Intestino Grueso. La incidencia en estudios diagnósticos es de aproximadamente 1 por cada 2000 exploraciones.
+</div>
+</div>
+"""
     st.markdown(bienvenida, unsafe_allow_html=True)
     st.markdown("<br>", unsafe_allow_html=True)
     opcion = st.radio("¿En qué etapa te encuentras?", ["Seleccionar...", "ANTES DE MI ENDOSCOPIA", "MI PREPARACIÓN", "DESPUÉS DE MI ENDOSCOPIA"])
@@ -165,14 +168,67 @@ elif opcion == "MI PREPARACIÓN":
 
 elif opcion == "DESPUÉS DE MI ENDOSCOPIA":
     st.markdown("## 🏁 Recomendaciones Post-Estudio")
-    # Los 6 puntos detallados (resumidos en el PDF pero extensos en pantalla)
-    puntos = [
-        ("1. OBSERVACIONES INICIALES", "Permanecer bajo vigilancia... No conducir por 12 hs.", "#eafaf1", "#2bb673"),
-        ("2. CUIDADOS EN EL DOMICILIO", "Descansar, dieta ligera, evitar esfuerzos.", "#f4f6f7", "#95a5a6"),
-        ("3. SIGNOS DE ALARMA", "Dolor intenso, fiebre >= 38, sangrado.", "#fdedec", "#e74c3c"),
-        ("4. CONTACTO DE URGENCIA", "CEMIC 11 5596 2440 (08-20hs). Guardia Galván 4102.", "#eafaf1", "#2bb673"),
-        ("5. INDICACIONES IMPORTANTES", "Mantenerse acompañado, guardar esta hoja.", "#fef9e7", "#f1c40f"),
-        ("6. TOMA DE MUESTRAS", "Resultados en 21 días a informespatologia@cemic.edu.ar.", "#ffffff", "#2bb673")
-    ]
-    for tit, cont, bg, brd in puntos:
-        st.markdown(f'<div style="padding:20px; border-radius:15px; margin-bottom:15px; background-color:{bg}; border-left:6px solid {brd}; color:#333333 !important;"><b>{tit}</b><br>{cont}</div>', unsafe_allow_html=True)
+    
+    # Punto 1
+    st.markdown("""
+    <div style="padding:20px; border-radius:15px; margin-bottom:15px; background-color:#eafaf1; border-left:6px solid #2bb673; color:#333333 !important;">
+        <b style="color:#1e7d4f !important; font-size:1.1rem;">1. OBSERVACIONES INICIALES</b><br>
+        • Permanecer bajo vigilancia en la sala de recuperación endoscópica hasta que recupere estado de alerta y estabilidad vital.<br>
+        • Evite realizar actividades que requieran coordinación hasta pasadas al menos 12 horas post-procedimiento.<br>
+        • Evite conducir, manejar maquinaria o firmar documentos importantes durante las primeras 12 horas post procedimiento.
+    </div>
+    """, unsafe_allow_html=True)
+
+    # Punto 2
+    st.markdown("""
+    <div style="padding:20px; border-radius:15px; margin-bottom:15px; background-color:#f4f6f7; border-left:6px solid #95a5a6; color:#333333 !important;">
+        <b style="font-size:1.1rem;">2. CUIDADOS EN EL DOMICILIO</b><br>
+        • Descansar y evitar esfuerzos físicos importantes.<br>
+        • Mantener dieta ligera las primeras horas, según indicación del médico.<br>
+        • Evitar consumo de alcohol y medicamentos sedantes sin indicación.<br>
+        • Seguir indicaciones sobre la reanudación de su medicación habitual.<br>
+        • Controlar signos vitales si es posible: fiebre, pulso irregular o dolor intenso.
+    </div>
+    """, unsafe_allow_html=True)
+
+    # Punto 3
+    st.markdown("""
+    <div style="padding:20px; border-radius:15px; margin-bottom:15px; background-color:#fdedec; border-left:6px solid #e74c3c; color:#333333 !important;">
+        <b style="color:#c0392b !important; font-size:1.1rem;">3. SIGNOS DE ALARMA – ACUDIR DE INMEDIATO</b><br>
+        Consulte urgentemente al endoscopista o concurra a la guardia del hospital si presenta:<br>
+        • Dolor abdominal intenso o repentino.<br>
+        • Fiebre mayor o igual a 38°C.<br>
+        • Sangrado rectal abundante.<br>
+        • Vómitos persistentes.<br>
+        • Dificultad respiratoria o hinchazón abdominal marcada.
+    </div>
+    """, unsafe_allow_html=True)
+
+    # Punto 4
+    st.markdown("""
+    <div style="padding:20px; border-radius:15px; margin-bottom:15px; background-color:#eafaf1; border-left:6px solid #2bb673; color:#333333 !important;">
+        <b style="color:#1e7d4f !important; font-size:1.1rem;">4. CONTACTO DE URGENCIA</b><br>
+        • Contactarse al número de teléfono de Gastroenterología del CEMIC entre las 08:00 hs. y 20:00 hs: <b>11 5596 2440</b>.<br>
+        • Fuera de este horario, concurrir directamente a la guardia del CEMIC: Galván 4102 (Saavedra) o Av. Cnel. Díaz 2423 (Palermo).
+    </div>
+    """, unsafe_allow_html=True)
+
+    # Punto 5
+    st.markdown("""
+    <div style="padding:20px; border-radius:15px; margin-bottom:15px; background-color:#fef9e7; border-left:6px solid #f1c40f; color:#333333 !important;">
+        <b style="color:#856404 !important; font-size:1.1rem;">5. INDICACIONES IMPORTANTES PRIMERAS 12 HORAS</b><br>
+        • Mantenerse acompañado si es posible.<br>
+        • No realizar actividad física, no conducir ni operar maquinaria.<br>
+        • Seguir las recomendaciones de dieta e indicaciones del equipo médico.<br>
+        • Guardar esta hoja y mostrarla en caso de urgencia.
+    </div>
+    """, unsafe_allow_html=True)
+
+    # Punto 6
+    st.markdown("""
+    <div style="padding:20px; border-radius:15px; margin-bottom:15px; background-color:#ffffff; border:2px solid #2bb673; border-left:10px solid #2bb673; color:#333333 !important;">
+        <b style="color:#1e7d4f !important; font-size:1.1rem;">6. TOMA DE MUESTRAS - ANATOMÍA PATOLÓGICA</b><br>
+        • Si se realizó toma de muestras/biopsias, el resultado será enviado automáticamente a su mail registrado en CEMIC.<br>
+        • De no recibirlo en 21 días, pedirlo a: <b>informespatologia@cemic.edu.ar</b>. (Recuerde que ya no se retiran de forma impresa).
+    </div>
+    """, unsafe_allow_html=True)
