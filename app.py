@@ -138,7 +138,8 @@ with col2:
 if opcion == "ANTES DE MI ENDOSCOPIA":
     st.markdown("## 📋 Antes de mi Endoscopía")
     st.markdown(f'<div style="background-color:white; padding:30px; border-radius:15px; border-left:10px solid #2bb673; color:#333333 !important; font-size:18px; line-height:1.7;">{TEXTO_ANTES.replace(chr(10), "<br>")}</div>', unsafe_allow_html=True)
-    st.markdow
+    st.markdown("### 🍎 Dieta 3 días previos")
+    mostrar_docx("textos/Dieta comun 3 días PREVIOS AL ESTUDIO.docx")
 
 elif opcion == "MI PREPARACIÓN":
     st.markdown("## 💧 Plan de Preparación")
