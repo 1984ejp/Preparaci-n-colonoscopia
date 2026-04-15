@@ -181,16 +181,18 @@ elif opcion == "MI PREPARACIÓN":
 elif opcion == "DESPUÉS DE MI ENDOSCOPIA":
     st.markdown("## 🏁 Recomendaciones Post-Estudio")
     
-    # RECUADRO CON LOS 6 PUNTOS COMPLETOS SIN RECORTES
-    post_estudio_html = f"""
-<div style="color: #333333 !important;">
-    <div style="padding:20px; border-radius:15px; margin-bottom:15px; background-color:#eafaf1; border-left:6px solid #2bb673; color:#1e7d4f !important; box-shadow: 0px 4px 10px rgba(0,0,0,0.03);">
-        <b style="font-size:1.1rem;">1. OBSERVACIONES INICIALES</b><br>
+    # Punto 1
+    st.markdown("""
+    <div style="padding:20px; border-radius:15px; margin-bottom:15px; background-color:#eafaf1; border-left:6px solid #2bb673; color:#333333 !important;">
+        <b style="color:#1e7d4f !important; font-size:1.1rem;">1. OBSERVACIONES INICIALES</b><br>
         • Permanecer bajo vigilancia en la sala de recuperación endoscópica hasta que recupere estado de alerta y estabilidad vital.<br>
         • Evite realizar actividades que requieran coordinación hasta pasadas al menos 12 horas post-procedimiento.<br>
         • Evite conducir, manejar maquinaria o firmar documentos importantes durante las primeras 12 horas post procedimiento.
     </div>
+    """, unsafe_allow_html=True)
 
+    # Punto 2
+    st.markdown("""
     <div style="padding:20px; border-radius:15px; margin-bottom:15px; background-color:#f4f6f7; border-left:6px solid #95a5a6; color:#333333 !important;">
         <b style="font-size:1.1rem;">2. CUIDADOS EN EL DOMICILIO</b><br>
         • Descansar y evitar esfuerzos físicos importantes.<br>
@@ -199,9 +201,12 @@ elif opcion == "DESPUÉS DE MI ENDOSCOPIA":
         • Seguir indicaciones sobre la reanudación de su medicación habitual.<br>
         • Controlar signos vitales si es posible: fiebre, pulso irregular o dolor intenso.
     </div>
+    """, unsafe_allow_html=True)
 
-    <div style="padding:20px; border-radius:15px; margin-bottom:15px; background-color:#fdedec; border-left:6px solid #e74c3c; color:#c0392b !important;">
-        <b style="font-size:1.1rem;">3. SIGNOS DE ALARMA – ACUDIR DE INMEDIATO</b><br>
+    # Punto 3
+    st.markdown("""
+    <div style="padding:20px; border-radius:15px; margin-bottom:15px; background-color:#fdedec; border-left:6px solid #e74c3c; color:#333333 !important;">
+        <b style="color:#c0392b !important; font-size:1.1rem;">3. SIGNOS DE ALARMA – ACUDIR DE INMEDIATO</b><br>
         Consulte urgentemente al endoscopista o concurra a la guardia del hospital si presenta:<br>
         • Dolor abdominal intenso o repentino.<br>
         • Fiebre mayor o igual a 38°C.<br>
@@ -209,26 +214,33 @@ elif opcion == "DESPUÉS DE MI ENDOSCOPIA":
         • Vómitos persistentes.<br>
         • Dificultad respiratoria o hinchazón abdominal marcada.
     </div>
+    """, unsafe_allow_html=True)
 
-    <div style="padding:20px; border-radius:15px; margin-bottom:15px; background-color:#eafaf1; border-left:6px solid #2bb673; color:#1e7d4f !important;">
-        <b style="font-size:1.1rem;">4. CONTACTO DE URGENCIA</b><br>
+    # Punto 4
+    st.markdown("""
+    <div style="padding:20px; border-radius:15px; margin-bottom:15px; background-color:#eafaf1; border-left:6px solid #2bb673; color:#333333 !important;">
+        <b style="color:#1e7d4f !important; font-size:1.1rem;">4. CONTACTO DE URGENCIA</b><br>
         • Contactarse al número de teléfono de Gastroenterología del CEMIC entre las 08:00 hs. y 20:00 hs: <b>11 5596 2440</b>.<br>
         • Fuera de este horario, concurrir directamente a la guardia del CEMIC: Galván 4102 (Saavedra) o Av. Cnel. Díaz 2423 (Palermo).
     </div>
+    """, unsafe_allow_html=True)
 
-    <div style="padding:20px; border-radius:15px; margin-bottom:15px; background-color:#fef9e7; border-left:6px solid #f1c40f; color:#856404 !important;">
-        <b style="font-size:1.1rem;">5. INDICACIONES IMPORTANTES PRIMERAS 12 HORAS</b><br>
+    # Punto 5
+    st.markdown("""
+    <div style="padding:20px; border-radius:15px; margin-bottom:15px; background-color:#fef9e7; border-left:6px solid #f1c40f; color:#333333 !important;">
+        <b style="color:#856404 !important; font-size:1.1rem;">5. INDICACIONES IMPORTANTES PRIMERAS 12 HORAS</b><br>
         • Mantenerse acompañado si es posible.<br>
         • No realizar actividad física, no conducir ni operar maquinaria.<br>
         • Seguir las recomendaciones de dieta e indicaciones del equipo médico.<br>
         • Guardar esta hoja y mostrarla en caso de urgencia.
     </div>
+    """, unsafe_allow_html=True)
 
-    <div style="padding:20px; border-radius:15px; margin-bottom:15px; background-color:#ffffff; border:2px solid #2bb673; border-left:10px solid #2bb673; color:#1e7d4f !important;">
-        <b style="font-size:1.1rem;">6. TOMA DE MUESTRAS - ANATOMÍA PATOLÓGICA</b><br>
+    # Punto 6
+    st.markdown("""
+    <div style="padding:20px; border-radius:15px; margin-bottom:15px; background-color:#ffffff; border:2px solid #2bb673; border-left:10px solid #2bb673; color:#333333 !important;">
+        <b style="color:#1e7d4f !important; font-size:1.1rem;">6. TOMA DE MUESTRAS - ANATOMÍA PATOLÓGICA</b><br>
         • Si se realizó toma de muestras/biopsias, el resultado será enviado automáticamente a su mail registrado en CEMIC.<br>
         • De no recibirlo en 21 días, pedirlo a: <b>informespatologia@cemic.edu.ar</b>. (Recuerde que ya no se retiran de forma impresa).
     </div>
-</div>
-"""
-    st.markdown(post_estudio_html, unsafe_allow_html=True)
+    """, unsafe_allow_html=True)
