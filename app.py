@@ -56,30 +56,22 @@ def generar_pdf(titulo_prep, contenido_prep):
     with tempfile.NamedTemporaryFile(delete=False, suffix=".pdf") as tmp:
         doc = SimpleDocTemplate(tmp.name, pagesize=A4)
         estilos = getSampleStyleSheet()
-        
-        # Estilos personalizados
         estilo_titulo = ParagraphStyle('Titulo', parent=estilos['Heading1'], alignment=TA_CENTER, textColor='#2bb673', spaceAfter=20)
         estilo_sub = ParagraphStyle('Sub', parent=estilos['Heading2'], textColor='#1e7d4f', spaceBefore=15, spaceAfter=10)
         estilo_body = ParagraphStyle('Body', parent=estilos['Normal'], fontSize=10, leading=14, alignment=TA_LEFT, textColor='#333333')
 
         historia = []
         historia.append(Paragraph(f"Plan de Preparación: {titulo_prep}", estilo_titulo))
-        
-        # Sección ANTES
         historia.append(Paragraph("I. INSTRUCCIONES PREVIAS (ANTES DEL ESTUDIO)", estilo_sub))
         for linea in TEXTO_ANTES.split('\n'):
             if linea.strip(): historia.append(Paragraph(linea, estilo_body))
         
         historia.append(PageBreak())
-        
-        # Sección PREPARACIÓN
         historia.append(Paragraph(f"II. CRONOGRAMA DE PREPARACIÓN ({titulo_prep})", estilo_sub))
         for linea in contenido_prep.split('\n'):
             if linea.strip(): historia.append(Paragraph(linea, estilo_body))
         
         historia.append(PageBreak())
-
-        # Sección DESPUÉS
         historia.append(Paragraph("III. RECOMENDACIONES POST-ESTUDIO (DESPUÉS)", estilo_sub))
         for linea in TEXTO_DESPUES_PDF.split('\n'):
             if linea.strip(): historia.append(Paragraph(linea, estilo_body))
@@ -112,20 +104,17 @@ with col1:
     <div class="card">
     <h1 style="margin-top:0;">Hola, soy Francisco 👋</h1>
     <h3 style="color:#444444 !important;">Voy a ayudarte paso a paso con tu estudio.</h3>
-    <div style="padding:18px; border-radius:15px; margin-bottom:12px; background-color:#2bb673; color:white !important;">
     <div style="padding:20px; border-radius:15px; margin-bottom:15px; background-color:#2bb673; color:white !important; font-size:18px;">
-<span style="color:white !important;">La Endoscopía representa hoy, la mejor técnica para el diagnóstico y seguimiento de las enfermedades del Intestino Grueso, la prevención del Cáncer de Colon y para el tratamiento de un variado número de lesiones.</span>
-</div>
-
-<div style="padding:18px; border-radius:15px; margin-bottom:15px; background-color:#eafaf1; border-left:6px solid #2bb673; color:#1e7d4f !important; font-size:17px;">
-Durante el estudio se pueden extraer pólipos y tomar biopsias.
-</div>
-
-<div style="padding:18px; border-radius:15px; margin-bottom:15px; background-color:#fef9e7; border-left:6px solid #f1c40f; color:#1a5c96 !important; font-size:17px;">
-Entre los riesgos potenciales, está la perforación microscópica y/o completa del Intestino Grueso. La incidencia en estudios diagnósticos es de aproximadamente 1 por cada 2000 exploraciones.
-</div>
-</div>
-"""
+    <span style="color:white !important;">La Endoscopía representa hoy, la mejor técnica para el diagnóstico y seguimiento de las enfermedades del Intestino Grueso, la prevención del Cáncer de Colon y para el tratamiento de un variado número de lesiones.</span>
+    </div>
+    <div style="padding:18px; border-radius:15px; margin-bottom:15px; background-color:#eafaf1; border-left:6px solid #2bb673; color:#1e7d4f !important; font-size:17px;">
+    Durante el estudio se pueden extraer pólipos y tomar biopsias.
+    </div>
+    <div style="padding:18px; border-radius:15px; margin-bottom:15px; background-color:#fef9e7; border-left:6px solid #f1c40f; color:#1a5c96 !important; font-size:17px;">
+    Entre los riesgos potenciales, está la perforación microscópica y/o completa del Intestino Grueso. La incidencia en estudios diagnósticos es de aproximadamente 1 por cada 2000 exploraciones.
+    </div>
+    </div>
+    """
     st.markdown(bienvenida, unsafe_allow_html=True)
     st.markdown("<br>", unsafe_allow_html=True)
     opcion = st.radio("¿En qué etapa te encuentras?", ["Seleccionar...", "ANTES DE MI ENDOSCOPIA", "MI PREPARACIÓN", "DESPUÉS DE MI ENDOSCOPIA"])
@@ -138,7 +127,9 @@ with col2:
 if opcion == "ANTES DE MI ENDOSCOPIA":
     st.markdown("## 📋 Antes de mi Endoscopía")
     st.markdown(f'<div style="background-color:white; padding:30px; border-radius:15px; border-left:10px solid #2bb673; color:#333333 !important; font-size:18px; line-height:1.7;">{TEXTO_ANTES.replace(chr(10), "<br>")}</div>', unsafe_allow_html=True)
-    st.markdown("### 🍎 Dieta 3 días previos")
+    
+    # CAMBIO SOLICITADO AQUÍ: "El día previo"
+    st.markdown("### 🍎 El día previo al estudio")
     mostrar_docx("textos/Dieta comun 3 días PREVIOS AL ESTUDIO.docx")
 
 elif opcion == "MI PREPARACIÓN":
@@ -160,8 +151,6 @@ elif opcion == "MI PREPARACIÓN":
         st.success(f"Plan: {familia} ({franja})")
         contenido = texto_docx(st.session_state['archivo_ruta'])
         mostrar_docx(st.session_state['archivo_ruta'])
-        
-        # BOTÓN DE DESCARGA PDF
         pdf_path = generar_pdf(st.session_state['nombre_prep'], contenido)
         with open(pdf_path, "rb") as f:
             st.download_button(label="📥 DESCARGAR INSTRUCCIONES EN PDF", data=f, file_name=f"{st.session_state['nombre_prep']}.pdf", mime="application/pdf")
@@ -169,7 +158,6 @@ elif opcion == "MI PREPARACIÓN":
 elif opcion == "DESPUÉS DE MI ENDOSCOPIA":
     st.markdown("## 🏁 Recomendaciones Post-Estudio")
     
-    # Punto 1
     st.markdown("""
     <div style="padding:20px; border-radius:15px; margin-bottom:15px; background-color:#eafaf1; border-left:6px solid #2bb673; color:#333333 !important;">
         <b style="color:#1e7d4f !important; font-size:1.1rem;">1. OBSERVACIONES INICIALES</b><br>
@@ -177,10 +165,6 @@ elif opcion == "DESPUÉS DE MI ENDOSCOPIA":
         • Evite realizar actividades que requieran coordinación hasta pasadas al menos 12 horas post-procedimiento.<br>
         • Evite conducir, manejar maquinaria o firmar documentos importantes durante las primeras 12 horas post procedimiento.
     </div>
-    """, unsafe_allow_html=True)
-
-    # Punto 2
-    st.markdown("""
     <div style="padding:20px; border-radius:15px; margin-bottom:15px; background-color:#f4f6f7; border-left:6px solid #95a5a6; color:#333333 !important;">
         <b style="font-size:1.1rem;">2. CUIDADOS EN EL DOMICILIO</b><br>
         • Descansar y evitar esfuerzos físicos importantes.<br>
@@ -189,10 +173,6 @@ elif opcion == "DESPUÉS DE MI ENDOSCOPIA":
         • Seguir indicaciones sobre la reanudación de su medicación habitual.<br>
         • Controlar signos vitales si es posible: fiebre, pulso irregular o dolor intenso.
     </div>
-    """, unsafe_allow_html=True)
-
-    # Punto 3
-    st.markdown("""
     <div style="padding:20px; border-radius:15px; margin-bottom:15px; background-color:#fdedec; border-left:6px solid #e74c3c; color:#333333 !important;">
         <b style="color:#c0392b !important; font-size:1.1rem;">3. SIGNOS DE ALARMA – ACUDIR DE INMEDIATO</b><br>
         Consulte urgentemente al endoscopista o concurra a la guardia del hospital si presenta:<br>
@@ -202,19 +182,11 @@ elif opcion == "DESPUÉS DE MI ENDOSCOPIA":
         • Vómitos persistentes.<br>
         • Dificultad respiratoria o hinchazón abdominal marcada.
     </div>
-    """, unsafe_allow_html=True)
-
-    # Punto 4
-    st.markdown("""
     <div style="padding:20px; border-radius:15px; margin-bottom:15px; background-color:#eafaf1; border-left:6px solid #2bb673; color:#333333 !important;">
         <b style="color:#1e7d4f !important; font-size:1.1rem;">4. CONTACTO DE URGENCIA</b><br>
         • Contactarse al número de teléfono de Gastroenterología del CEMIC entre las 08:00 hs. y 20:00 hs: <b>11 5596 2440</b>.<br>
         • Fuera de este horario, concurrir directamente a la guardia del CEMIC: Galván 4102 (Saavedra) o Av. Cnel. Díaz 2423 (Palermo).
     </div>
-    """, unsafe_allow_html=True)
-
-    # Punto 5
-    st.markdown("""
     <div style="padding:20px; border-radius:15px; margin-bottom:15px; background-color:#fef9e7; border-left:6px solid #f1c40f; color:#333333 !important;">
         <b style="color:#856404 !important; font-size:1.1rem;">5. INDICACIONES IMPORTANTES PRIMERAS 12 HORAS</b><br>
         • Mantenerse acompañado si es posible.<br>
@@ -222,10 +194,6 @@ elif opcion == "DESPUÉS DE MI ENDOSCOPIA":
         • Seguir las recomendaciones de dieta e indicaciones del equipo médico.<br>
         • Guardar esta hoja y mostrarla en caso de urgencia.
     </div>
-    """, unsafe_allow_html=True)
-
-    # Punto 6
-    st.markdown("""
     <div style="padding:20px; border-radius:15px; margin-bottom:15px; background-color:#ffffff; border:2px solid #2bb673; border-left:10px solid #2bb673; color:#333333 !important;">
         <b style="color:#1e7d4f !important; font-size:1.1rem;">6. TOMA DE MUESTRAS - ANATOMÍA PATOLÓGICA</b><br>
         • Si se realizó toma de muestras/biopsias, el resultado será enviado automáticamente a su mail registrado en CEMIC.<br>
